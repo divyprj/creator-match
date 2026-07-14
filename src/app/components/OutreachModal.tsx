@@ -3,18 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-interface Creator {
-  id: string;
-  handle: string;
-  name: string;
-  email: string | null;
-  followers_count: number;
-  engagement_rate: number | null;
-  location: string | null;
-  niche: string;
-  bio: string | null;
-  recent_posts: any[] | null;
-}
+import { Creator, AppSettings } from '@/types';
+
 
 interface OutreachModalProps {
   creator: Creator | null;
@@ -37,17 +27,20 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [dmBody, setDmBody] = useState('');
-  
   const [sendingEmail, setSendingEmail] = useState(false);
   const [copiedDm, setCopiedDm] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Gemini auto-fire prevention state
+  const [copyGenerated, setCopyGenerated] = useState(false);
+
   useEffect(() => {
-    if (creator) {
+    // If the copy has already been generated once, auto-update it when collabType changes
+    if (copyGenerated && creator) {
       handleGenerate();
     }
-  }, [creator, collabType]);
+  }, [collabType]);
 
   const handleGenerate = async () => {
     if (!creator) return;
@@ -59,6 +52,19 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
     setDmBody('');
 
     try {
+      // Load local credentials/SMTP settings from localStorage
+      let localSettings = null;
+      if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('creator_match_settings');
+        if (local) {
+          try {
+            localSettings = JSON.parse(local);
+          } catch (e) {
+            console.warn('Failed to parse localStorage settings', e);
+          }
+        }
+      }
+
       const response = await fetch('/api/outreach/generate', {
         method: 'POST',
         headers: {
@@ -67,11 +73,13 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
         body: JSON.stringify({
           creatorId: creator.id,
           collabType,
+          settings: localSettings,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to generate outreach: HTTP ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to generate outreach: HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -82,6 +90,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
       setEmailSubject(data.emailSubject || `Collaboration opportunity with @${creator.handle}`);
       setEmailBody(data.emailBody || '');
       setDmBody(data.dmBody || '');
+      setCopyGenerated(true);
 
       // Update outreach status to draft_created if status is uncontacted
       const { error: updateError } = await supabase
@@ -107,6 +116,19 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
     setSuccessMsg('');
 
     try {
+      // Load local credentials/SMTP settings from localStorage
+      let localSettings = null;
+      if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('creator_match_settings');
+        if (local) {
+          try {
+            localSettings = JSON.parse(local);
+          } catch (e) {
+            console.warn('Failed to parse localStorage settings', e);
+          }
+        }
+      }
+
       const response = await fetch('/api/outreach/send-email', {
         method: 'POST',
         headers: {
@@ -116,11 +138,13 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
           creatorId: creator.id,
           subject: emailSubject,
           body: emailBody,
+          settings: localSettings,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to send email: HTTP ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to send email: HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -229,6 +253,32 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '12px' }}>
             <div className="loader" style={{ width: '40px', height: '40px', borderWidth: '4px' }} />
             <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Personalizing copy using Gemini AI...</span>
+          </div>
+        ) : !copyGenerated ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', gap: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px dashed var(--card-border)', textAlign: 'center' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(56, 151, 245, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: 'var(--color-accent-primary)' }}>
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+            <div>
+              <h4 style={{ fontWeight: '600', fontSize: '15px' }}>Outreach Copy Ready to Generate</h4>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', maxWidth: '380px' }}>
+                Use Gemini AI to craft a highly personalized email & Instagram DM proposal using this creator's recent content.
+              </p>
+            </div>
+            <button 
+              onClick={handleGenerate}
+              className="btn btn-primary"
+              style={{ padding: '10px 24px' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ verticalAlign: 'middle' }}>
+                <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2Z"/>
+              </svg>
+              Generate Copy with Gemini
+            </button>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

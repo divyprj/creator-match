@@ -3,30 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-interface Creator {
-  id: string;
-  handle: string;
-  name: string;
-  email: string | null;
-  followers_count: number;
-  engagement_rate: number | null;
-  engagement_rate_str: string | null;
-  location: string | null;
-  niche: string;
-  bio: string | null;
-  profile_image: string | null;
-  recent_posts: any[] | null;
-  outreach_status: string;
-}
+import { Creator, OutreachLog } from '@/types';
 
-interface OutreachLog {
-  id: string;
-  type: 'email' | 'dm';
-  subject: string | null;
-  content: string;
-  status: 'draft' | 'sent';
-  created_at: string;
-}
 
 interface CreatorDrawerProps {
   creator: Creator | null;

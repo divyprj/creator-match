@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { creatorId, collabType } = body;
+    const { creatorId, collabType, settings } = body;
 
     if (!creatorId) {
       return NextResponse.json({ error: 'Creator ID is required' }, { status: 400 });
@@ -31,18 +31,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Fetch Gemini API Key from settings (database) or env
-    const { data: settingsData, error: settingsError } = await supabase
-      .from('settings')
-      .select('gemini_api_key')
-      .eq('id', 1)
-      .single();
+    // 2. Resolve Gemini API Key (request body or environment variable)
+    const apiKey = settings?.gemini_api_key || process.env.GEMINI_API_KEY;
 
-    const apiKey = settingsData?.gemini_api_key || process.env.GEMINI_API_KEY;
-
-    if (!apiKey || apiKey.includes('your-gemini-api-key')) {
+    if (!apiKey || apiKey.includes('your-gemini-api-key') || apiKey === '') {
       return NextResponse.json(
-        { error: 'Gemini API Key is not configured. Please add it in App Settings.' },
+        { error: 'Gemini API Key is not configured. Please add it in App Settings or set GEMINI_API_KEY in your env.' },
         { status: 400 }
       );
     }

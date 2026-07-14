@@ -6,35 +6,13 @@ import DiscoveryPanel from './components/DiscoveryPanel';
 import CreatorDrawer from './components/CreatorDrawer';
 import OutreachModal from './components/OutreachModal';
 
-interface Creator {
-  id: string;
-  handle: string;
-  name: string;
-  email: string | null;
-  followers_count: number;
-  engagement_rate: number | null;
-  engagement_rate_str: string | null;
-  location: string | null;
-  niche: string;
-  bio: string | null;
-  profile_image: string | null;
-  recent_posts: any[] | null;
-  outreach_status: string;
-}
+import { Creator, AppSettings } from '@/types';
 
 interface Stats {
   total: number;
   emailed: number;
   pending: number;
   avgEngagement: number;
-}
-
-interface AppSettings {
-  smtp_host: string;
-  smtp_port: number;
-  smtp_user: string;
-  smtp_pass: string;
-  gemini_api_key: string;
 }
 
 const formatFollowers = (num: number) => {
@@ -58,6 +36,10 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSegment, setShowSegment] = useState(false); // Indian Fashion & Beauty segment
+
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Modal / Drawer States
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
@@ -92,7 +74,7 @@ export default function Dashboard() {
     setLoading(false);
   };
   const loadSettings = async () => {
-    // 1. Try loading from localStorage first for immediate local availability
+    // Load from localStorage
     if (typeof window !== 'undefined') {
       const local = localStorage.getItem('creator_match_settings');
       if (local) {
@@ -104,58 +86,78 @@ export default function Dashboard() {
         }
       }
     }
-
-    // 2. Fetch from Supabase as backup/sync
-    try {
-      const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
-      if (error && error.code !== 'PGRST116') throw error;
-      if (data) {
-        const dbSettings = {
-          smtp_host: data.smtp_host || '',
-          smtp_port: data.smtp_port || 465,
-          smtp_user: data.smtp_user || '',
-          smtp_pass: data.smtp_pass || '',
-          gemini_api_key: data.gemini_api_key || '',
-        };
-        setSettings(dbSettings);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('creator_match_settings', JSON.stringify(dbSettings));
-        }
-      }
-      setDbError(null);
-    } catch (e: any) {
-      console.warn('Error loading settings from database:', e.message || e);
-    }
   };
 
   const saveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingSettings(true);
     try {
-      // 1. Save to local storage first
+      // Save to local storage
       if (typeof window !== 'undefined') {
         localStorage.setItem('creator_match_settings', JSON.stringify(settings));
       }
-
-      // 2. Save to Supabase database
-      const { error } = await supabase.from('settings').upsert({
-        id: 1,
-        ...settings,
-      });
-      if (error) throw error;
-      alert('Settings saved successfully!');
+      alert('Settings saved successfully in your browser! (Fallbacks to server-side env vars if any field is left empty)');
       setShowSettings(false);
-      setDbError(null);
     } catch (err: any) {
-      alert(`Error saving settings to database: ${err.message}. (Saved locally in browser)`);
-      setShowSettings(false);
+      alert(`Error saving settings locally: ${err.message}`);
     } finally {
       setSavingSettings(false);
     }
   };
 
+  const handleExportCSV = () => {
+    if (creators.length === 0) return;
+
+    // Define CSV Headers
+    const headers = [
+      'Name',
+      'Handle',
+      'Niche',
+      'Followers',
+      'Engagement Rate',
+      'Location',
+      'Email',
+      'Status'
+    ];
+
+    // Map creator data to rows, escaping values
+    const rows = creators.map((c) => {
+      const escapedName = `"${(c.name || '').replace(/"/g, '""')}"`;
+      const escapedHandle = `"${(c.handle || '').replace(/"/g, '""')}"`;
+      const escapedNiche = `"${(c.niche || '').replace(/"/g, '""')}"`;
+      const followers = c.followers_count;
+      const engRate = `"${(c.engagement_rate_str || (c.engagement_rate ? `${c.engagement_rate}%` : 'N/A')).replace(/"/g, '""')}"`;
+      const escapedLocation = `"${(c.location || 'N/A').replace(/"/g, '""')}"`;
+      const escapedEmail = `"${(c.email || 'N/A').replace(/"/g, '""')}"`;
+      const escapedStatus = `"${(c.outreach_status || 'uncontacted').replace(/"/g, '""')}"`;
+
+      return [
+        escapedName,
+        escapedHandle,
+        escapedNiche,
+        followers,
+        engRate,
+        escapedLocation,
+        escapedEmail,
+        escapedStatus
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `creator_outreach_list_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const fetchCreatorsList = async () => {
     try {
+      setCurrentPage(1);
       let query = supabase.from('influencers').select('*');
 
       // 1. Segment Tab Filter: Indian Fashion & Beauty
@@ -251,6 +253,9 @@ export default function Dashboard() {
     setSelectedNiche('All'); // Clear explicit niche dropdown when segment is active
   };
 
+  const totalPages = Math.ceil(creators.length / itemsPerPage);
+  const paginatedCreators = creators.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div className="dashboard-grid">
       {/* Sidebar / Filters */}      <aside className="sidebar">
@@ -283,6 +288,8 @@ export default function Dashboard() {
             <option value="Gaming">Gaming</option>
             <option value="Finance">Finance</option>
             <option value="Education">Education</option>
+            <option value="Travel">Travel</option>
+            <option value="Parenting">Parenting</option>
           </select>
         </div>
 
@@ -443,25 +450,43 @@ export default function Dashboard() {
               style={{ maxWidth: '300px' }}
             />
 
-            {/* Status Filters */}
-            <div style={{ display: 'flex', gap: '5px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
-              {['All', 'uncontacted', 'draft_created', 'emailed', 'dm_copied'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setStatusFilter(filter)}
-                  className="btn"
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: '12px',
-                    borderRadius: '6px',
-                    background: statusFilter === filter ? 'rgba(255,255,255,0.08)' : 'transparent',
-                    border: 'none',
-                    color: statusFilter === filter ? 'white' : 'var(--color-text-secondary)',
-                  }}
-                >
-                  {filter.replace('_', ' ').toUpperCase()}
-                </button>
-              ))}
+            {/* Right actions: Status Filters + Export CSV */}
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {/* Status Filters */}
+              <div style={{ display: 'flex', gap: '5px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
+                {['All', 'uncontacted', 'draft_created', 'emailed', 'dm_copied'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setStatusFilter(filter)}
+                    className="btn"
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      borderRadius: '6px',
+                      background: statusFilter === filter ? 'rgba(255,255,255,0.08)' : 'transparent',
+                      border: 'none',
+                      color: statusFilter === filter ? 'white' : 'var(--color-text-secondary)',
+                    }}
+                  >
+                    {filter.replace('_', ' ').toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              {/* Export CSV */}
+              <button
+                onClick={handleExportCSV}
+                className="btn btn-secondary"
+                style={{ padding: '8px 16px', fontSize: '12px' }}
+                disabled={creators.length === 0}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ verticalAlign: 'middle' }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export CSV
+              </button>
             </div>
           </div>
 
@@ -496,7 +521,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {creators.map((c) => (
+                  {paginatedCreators.map((c) => (
                     <tr key={c.id} onClick={() => setSelectedCreator(c)} style={{ cursor: 'pointer' }}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -538,6 +563,36 @@ export default function Dashboard() {
               </table>
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {!loading && creators.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderTop: '1px solid var(--card-border)', gap: '15px', background: 'rgba(0,0,0,0.2)' }}>
+              <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, creators.length)} of {creators.length} creators
+              </span>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '12px', opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                >
+                  Previous
+                </button>
+                <span style={{ fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: '500' }}>
+                  Page {currentPage} of {totalPages || 1}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '12px', opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

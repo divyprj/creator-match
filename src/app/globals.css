@@ -14,38 +14,38 @@
   --space-12: 48px;
 
   /* --- Colors: Surface Hierarchy --- */
-  --color-surface-0: #0b0c10;       /* Deep application backdrop */
-  --color-surface-1: #16181f;       /* Sidebar & header background */
-  --color-surface-2: #20232e;       /* Card fill & table rows */
-  --color-surface-3: #2d3140;       /* Dropdowns, tooltips, select hover */
+  --color-surface-0: #000000;       /* Pitch black backdrop (Meta style) */
+  --color-surface-1: #121212;       /* Raised card/sidebar surface */
+  --color-surface-2: #1e1e1e;       /* Table rows & inner containers */
+  --color-surface-3: #262626;       /* Dropdowns, tooltips, active states */
 
   /* --- Colors: Text Hierarchy --- */
-  --color-text-primary: #f5f6f8;     /* High contrast title and body text */
-  --color-text-secondary: #9ea4b0;   /* Secondary description and metadata text */
-  --color-text-tertiary: #6b7280;    /* Muted captions, placeholder and disabled labels */
+  --color-text-primary: #ffffff;     /* High contrast title text */
+  --color-text-secondary: #a8a8a8;   /* Secondary captions (Instagram gray) */
+  --color-text-tertiary: #737373;    /* Placeholders & disabled labels */
 
   /* --- Colors: Accent & Brand --- */
-  --color-accent-primary: #3897f5;   /* Meta Blue — main interactive element */
-  --color-accent-primary-hover: #1e87f0;
-  --color-accent-primary-glow: rgba(56, 151, 245, 0.15);
-  --color-accent-secondary: #0095f6; /* Secondary CTA / Interactive actions */
+  --color-accent-primary: #0095f6;   /* Instagram Blue */
+  --color-accent-primary-hover: #1877f2; /* Meta Blue */
+  --color-accent-primary-glow: rgba(0, 149, 246, 0.15);
+  --color-accent-secondary: #0095f6; /* Secondary action color */
   
   /* --- Colors: Status Semantics --- */
   --color-status-success: #12b76a;     /* Emerald green - Emailed */
   --color-status-success-bg: rgba(18, 183, 106, 0.1);
   --color-status-warning: #f79009;     /* Amber orange - Draft Created */
   --color-status-warning-bg: rgba(247, 144, 9, 0.1);
-  --color-status-error: #f04438;       /* Crimson red - Database Alerts / Errors */
+  --color-status-error: #f04438;       /* Crimson red - Alerts */
   --color-status-error-bg: rgba(240, 68, 56, 0.1);
-  --color-status-info: #0794c7;        /* Sky blue - DM Copied */
-  --color-status-info-bg: rgba(7, 148, 199, 0.1);
-  --color-status-neutral: #667085;     /* Gray - Uncontacted */
-  --color-status-neutral-bg: rgba(102, 112, 133, 0.1);
+  --color-status-info: #0095f6;        /* Instagram Blue - DM Copied */
+  --color-status-info-bg: rgba(0, 149, 246, 0.1);
+  --color-status-neutral: #737373;     /* Gray - Uncontacted */
+  --color-status-neutral-bg: rgba(115, 115, 115, 0.1);
 
   /* --- Colors: Borders --- */
-  --color-border-default: #252833;
-  --color-border-strong: #3b3f52;
-  --color-border-focus: #3897f5;
+  --color-border-default: #262626;   /* Thin Instagram style border */
+  --color-border-strong: #363636;    /* Focused border */
+  --color-border-focus: #0095f6;
 
   /* --- Typography: Font Sizes --- */
   --text-xs: 11px;
@@ -58,18 +58,18 @@
 
   /* --- Border Radii --- */
   --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-md: 8px;                  /* Softened rounded corners */
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
   /* --- Shadows & Depth --- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
-  --shadow-overlay: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.8);
+  --shadow-overlay: 0 20px 40px rgba(0, 0, 0, 0.9);
 
   /* --- Motion & Transitions --- */
-  --ease-default: cubic-bezier(0.16, 1, 0.3, 1);  /* Ultra-smooth out-back */
+  --ease-default: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 150ms;
   --duration-normal: 250ms;
 
@@ -94,8 +94,8 @@
   --status-copied: var(--color-status-info-bg);
   --status-copied-text: var(--color-status-info);
 
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 * {
@@ -412,3 +412,63 @@ body {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+/* --- Mobile Responsive Breakpoints --- */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--card-border);
+    padding: 20px;
+    gap: 20px;
+    height: auto;
+  }
+
+  main {
+    padding: 16px !important;
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  /* Adjust stats grid to 2 columns on mobile */
+  main > div[style*="gridTemplateColumns"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* Make creators table horizontally scrollable to prevent overflow */
+  .creator-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Make modal & drawer scale to full width on mobile */
+  .drawer {
+    width: 100vw;
+    max-width: 100vw;
+    padding: 20px;
+  }
+
+  .modal {
+    width: 95vw;
+    max-width: 95vw;
+    padding: 16px;
+    margin: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  main > div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+

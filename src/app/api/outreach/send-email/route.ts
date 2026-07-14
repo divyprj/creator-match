@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { creatorId, subject, body: emailBody } = body;
+    const { creatorId, subject, body: emailBody, settings } = body;
 
     if (!creatorId) {
       return NextResponse.json({ error: 'Creator ID is required' }, { status: 400 });
@@ -38,21 +38,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Fetch SMTP settings from database or environment
-    const { data: settingsData, error: settingsError } = await supabase
-      .from('settings')
-      .select('*')
-      .eq('id', 1)
-      .single();
+    // 2. Resolve SMTP credentials (request body or environment variables)
+    const host = settings?.smtp_host || process.env.SMTP_HOST;
+    const port = settings?.smtp_port || (process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465);
+    const user = settings?.smtp_user || process.env.SMTP_USER;
+    const pass = settings?.smtp_pass || process.env.SMTP_PASS;
 
-    const host = settingsData?.smtp_host || process.env.SMTP_HOST;
-    const port = settingsData?.smtp_port || (process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465);
-    const user = settingsData?.smtp_user || process.env.SMTP_USER;
-    const pass = settingsData?.smtp_pass || process.env.SMTP_PASS;
-
-    if (!host || !user || !pass || host.includes('your-email')) {
+    if (!host || !user || !pass || host.includes('your-email') || host === '') {
       return NextResponse.json(
-        { error: 'SMTP settings are not configured. Please add them in App Settings.' },
+        { error: 'SMTP settings are not configured. Please add them in App Settings or set environment variables.' },
         { status: 400 }
       );
     }

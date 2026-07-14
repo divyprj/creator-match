@@ -83,7 +83,8 @@ DROP POLICY IF EXISTS "Enable all access for anon users on outreach_logs" ON pub
 CREATE POLICY "Enable all access for anon users on outreach_logs"
 ON public.outreach_logs FOR ALL USING (true) WITH CHECK (true);
 
+-- For security, the settings table contains sensitive API keys and SMTP credentials.
+-- RLS is enabled, and NO public read/write access policies are created for this table.
+-- App credentials should be configured using server-side environment variables (.env.local) or local browser storage.
 DROP POLICY IF EXISTS "Enable all access for anon users on settings" ON public.settings;
-CREATE POLICY "Enable all access for anon users on settings"
-ON public.settings FOR ALL USING (true) WITH CHECK (true);
 
