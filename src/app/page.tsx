@@ -37,6 +37,13 @@ interface AppSettings {
   gemini_api_key: string;
 }
 
+const formatFollowers = (num: number) => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace('.0', '') + 'M';
+  }
+  return Math.round(num / 1000) + 'k';
+};
+
 export default function Dashboard() {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, emailed: 0, pending: 0, avgEngagement: 0 });
@@ -46,7 +53,7 @@ export default function Dashboard() {
   // Filter States
   const [selectedNiche, setSelectedNiche] = useState('All');
   const [minFollowers, setMinFollowers] = useState(5000);
-  const [maxFollowers, setMaxFollowers] = useState(100000);
+  const [maxFollowers, setMaxFollowers] = useState(10000000);
   const [locationSearch, setLocationSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -283,17 +290,17 @@ export default function Dashboard() {
         <div className="input-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="input-label" id="followers-range-label">Followers Range</span>
-            <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{Math.round(minFollowers / 1000)}k - {Math.round(maxFollowers / 1000)}k</span>
+            <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{formatFollowers(minFollowers)} - {formatFollowers(maxFollowers)}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
             <input
               type="range"
               aria-labelledby="followers-range-label"
               aria-valuemin={5000}
-              aria-valuemax={100000}
+              aria-valuemax={10000000}
               aria-valuenow={minFollowers}
               min="5000"
-              max="100000"
+              max="10000000"
               step="5000"
               value={minFollowers}
               onChange={(e) => setMinFollowers(parseInt(e.target.value))}
@@ -303,10 +310,10 @@ export default function Dashboard() {
               type="range"
               aria-labelledby="followers-range-label"
               aria-valuemin={5000}
-              aria-valuemax={100000}
+              aria-valuemax={10000000}
               aria-valuenow={maxFollowers}
               min="5000"
-              max="100000"
+              max="10000000"
               step="5000"
               value={maxFollowers}
               onChange={(e) => setMaxFollowers(parseInt(e.target.value))}

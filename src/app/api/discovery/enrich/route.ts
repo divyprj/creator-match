@@ -136,13 +136,13 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // 2. Follower Count Filter (5,000 to 100,000 followers)
-        if (followers < 5000 || followers > 100000) {
+        // 2. Follower Count Filter (5,000 to 10,000,000 followers)
+        if (followers < 5000 || followers > 10000000) {
           results.skipped++;
           results.details.push({
             url,
             status: 'skipped',
-            reason: `Follower count (${followers}) is outside micro-influencer range (5,000 - 100,000)`,
+            reason: `Follower count (${followers}) is outside range (5,000 - 10,000,000)`,
             followers,
           });
           continue;
