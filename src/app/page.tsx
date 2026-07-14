@@ -246,19 +246,19 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-grid">
-      {/* Sidebar / Filters */}
-      <aside className="sidebar">
+      {/* Sidebar / Filters */}      <aside className="sidebar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--primary-gradient)' }} />
-          <h1 style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.02em', background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--color-accent-primary)' }} />
+          <h1 style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.02em', color: 'var(--color-text-primary)' }}>
             CREATOR MATCH
           </h1>
         </div>
 
         {/* Niche Filter */}
         <div className="input-group">
-          <label className="input-label">Niche</label>
+          <label htmlFor="niche-select" className="input-label">Niche</label>
           <select
+            id="niche-select"
             value={selectedNiche}
             onChange={(e) => {
               setSelectedNiche(e.target.value);
@@ -282,12 +282,16 @@ export default function Dashboard() {
         {/* Follower Range Filter */}
         <div className="input-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label className="input-label">Followers Range</label>
+            <span className="input-label" id="followers-range-label">Followers Range</span>
             <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{Math.round(minFollowers / 1000)}k - {Math.round(maxFollowers / 1000)}k</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
             <input
               type="range"
+              aria-labelledby="followers-range-label"
+              aria-valuemin={5000}
+              aria-valuemax={100000}
+              aria-valuenow={minFollowers}
               min="5000"
               max="100000"
               step="5000"
@@ -297,6 +301,10 @@ export default function Dashboard() {
             />
             <input
               type="range"
+              aria-labelledby="followers-range-label"
+              aria-valuemin={5000}
+              aria-valuemax={100000}
+              aria-valuenow={maxFollowers}
               min="5000"
               max="100000"
               step="5000"
@@ -309,8 +317,9 @@ export default function Dashboard() {
 
         {/* Location Search */}
         <div className="input-group">
-          <label className="input-label">Location (City/State)</label>
+          <label htmlFor="location-search" className="input-label">Location (City/State)</label>
           <input
+            id="location-search"
             type="text"
             placeholder="e.g. Mumbai, Lucknow"
             className="input-field"
@@ -326,7 +335,7 @@ export default function Dashboard() {
             onClick={() => handleSelectSegment(!showSegment)}
             className="btn"
             style={{
-              background: showSegment ? 'var(--primary-gradient)' : 'rgba(255, 255, 255, 0.05)',
+              background: showSegment ? 'var(--color-accent-primary)' : 'rgba(255, 255, 255, 0.05)',
               borderColor: showSegment ? 'transparent' : 'rgba(255, 255, 255, 0.1)',
               color: 'white',
               justifyContent: 'center',
@@ -335,36 +344,54 @@ export default function Dashboard() {
               marginTop: '4px',
             }}
           >
-            ✦ Fashion & Beauty (&gt;3% ER)
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '6px' }} aria-hidden="true">
+              <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2Z"/>
+            </svg>
+            Fashion & Beauty (&gt;3% ER)
           </button>
         </div>
 
         {/* Settings button */}
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <button onClick={() => setShowSettings(true)} className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
-            ⚙ Credentials & SMTP
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }} aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Credentials & SMTP
           </button>
         </div>
       </aside>
 
+
       {/* Main Dashboard Panel */}
-      <main style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', height: '100vh' }}>
+      <main style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', height: '100vh', width: '100%' }}>
         {/* Header section */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold' }}>Dashboard</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Manage your influencer outreach list and campaigns.</p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>Manage your influencer outreach list and campaigns.</p>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={() => setShowDiscovery(!showDiscovery)} className="btn btn-primary">
-              ✦ Discover Influencers
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '6px' }} aria-hidden="true">
+                <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2Z"/>
+              </svg>
+              Discover Influencers
             </button>
           </div>
         </header>
 
         {dbError && (
-          <div className="glass" style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <h4 style={{ fontWeight: '600' }}>⚠️ Database Connection Alert</h4>
+          <div className="glass" style={{ padding: '16px', background: 'var(--color-status-error-bg)', borderColor: 'var(--color-status-error)', color: '#fca5a5', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <h4 style={{ fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }} aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Database Connection Alert
+            </h4>
             <p style={{ fontSize: '13px', color: '#cbd5e1' }}>{dbError}</p>
           </div>
         )}
@@ -372,20 +399,20 @@ export default function Dashboard() {
         {/* Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           <div className="glass" style={{ padding: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Total Creators</div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Creators</div>
             <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px' }}>{stats.total}</div>
           </div>
           <div className="glass" style={{ padding: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Emailed</div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px', color: '#10b981' }}>{stats.emailed}</div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Emailed</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px', color: 'var(--color-status-success)' }}>{stats.emailed}</div>
           </div>
           <div className="glass" style={{ padding: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Pending Outreach</div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px', color: '#f59e0b' }}>{stats.pending}</div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Pending Outreach</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px', color: 'var(--color-status-warning)' }}>{stats.pending}</div>
           </div>
           <div className="glass" style={{ padding: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Avg Engagement Rate</div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px', color: 'var(--primary)' }}>{stats.avgEngagement.toFixed(2)}%</div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Avg Engagement Rate</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px', color: 'var(--color-accent-primary)' }}>{stats.avgEngagement.toFixed(2)}%</div>
           </div>
         </div>
 
@@ -401,6 +428,7 @@ export default function Dashboard() {
             {/* Search Input */}
             <input
               type="text"
+              aria-label="Search by name or handle"
               placeholder="Search by name or handle..."
               className="input-field"
               value={searchQuery}
@@ -421,7 +449,7 @@ export default function Dashboard() {
                     borderRadius: '6px',
                     background: statusFilter === filter ? 'rgba(255,255,255,0.08)' : 'transparent',
                     border: 'none',
-                    color: statusFilter === filter ? 'white' : 'var(--text-secondary)',
+                    color: statusFilter === filter ? 'white' : 'var(--color-text-secondary)',
                   }}
                 >
                   {filter.replace('_', ' ').toUpperCase()}
@@ -437,11 +465,16 @@ export default function Dashboard() {
                 <div className="loader" style={{ width: '40px', height: '40px', borderWidth: '4px' }} />
               </div>
             ) : creators.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px', color: 'var(--text-secondary)', gap: '10px' }}>
-                <span style={{ fontSize: '24px' }}>🔍</span>
-                <p style={{ fontSize: '14px' }}>No creators found. Click "Discover Influencers" above to build your database!</p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px', color: 'var(--color-text-secondary)', gap: '12px', textAlign: 'center' }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: 'var(--color-text-tertiary)' }}>
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <h4 style={{ fontWeight: '600', color: 'var(--color-text-primary)', margin: '4px 0 0 0' }}>No creators found</h4>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, maxWidth: '280px' }}>Click "Discover Influencers" above to build your database!</p>
               </div>
             ) : (
+
               <table className="creator-table">
                 <thead>
                   <tr>
@@ -534,8 +567,9 @@ export default function Dashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {/* Gemini Key */}
               <div className="input-group">
-                <label className="input-label">Gemini API Key</label>
+                <label htmlFor="settings-gemini-key" className="input-label">Gemini API Key</label>
                 <input
+                  id="settings-gemini-key"
                   type="password"
                   value={settings.gemini_api_key}
                   onChange={(e) => setSettings({ ...settings, gemini_api_key: e.target.value })}
@@ -549,10 +583,11 @@ export default function Dashboard() {
               <hr style={{ border: '0', borderTop: '1px solid var(--card-border)' }} />
 
               {/* SMTP credentials */}
-              <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--primary)' }}>Gmail SMTP Configurations</h4>
+              <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-accent-primary)' }}>Gmail SMTP Configurations</h4>
               <div className="input-group">
-                <label className="input-label">SMTP Host</label>
+                <label htmlFor="settings-smtp-host" className="input-label">SMTP Host</label>
                 <input
+                  id="settings-smtp-host"
                   type="text"
                   value={settings.smtp_host}
                   onChange={(e) => setSettings({ ...settings, smtp_host: e.target.value })}
@@ -562,8 +597,9 @@ export default function Dashboard() {
                 />
               </div>
               <div className="input-group">
-                <label className="input-label">SMTP Port</label>
+                <label htmlFor="settings-smtp-port" className="input-label">SMTP Port</label>
                 <input
+                  id="settings-smtp-port"
                   type="number"
                   value={settings.smtp_port}
                   onChange={(e) => setSettings({ ...settings, smtp_port: parseInt(e.target.value) || 465 })}
@@ -572,8 +608,9 @@ export default function Dashboard() {
                 />
               </div>
               <div className="input-group">
-                <label className="input-label">SMTP Username (Email)</label>
+                <label htmlFor="settings-smtp-user" className="input-label">SMTP Username (Email)</label>
                 <input
+                  id="settings-smtp-user"
                   type="email"
                   value={settings.smtp_user}
                   onChange={(e) => setSettings({ ...settings, smtp_user: e.target.value })}
@@ -583,8 +620,9 @@ export default function Dashboard() {
                 />
               </div>
               <div className="input-group">
-                <label className="input-label">SMTP Password / App Password</label>
+                <label htmlFor="settings-smtp-pass" className="input-label">SMTP Password / App Password</label>
                 <input
+                  id="settings-smtp-pass"
                   type="password"
                   value={settings.smtp_pass}
                   onChange={(e) => setSettings({ ...settings, smtp_pass: e.target.value })}
@@ -604,6 +642,7 @@ export default function Dashboard() {
           </form>
         </div>
       )}
+
     </div>
   );
 }

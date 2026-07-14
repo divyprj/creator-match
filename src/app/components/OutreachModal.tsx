@@ -181,16 +181,16 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
           <h2 style={{ fontSize: '18px', fontWeight: '600' }}>Personalized Outreach for {creator.name}</h2>
           <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>Close</button>
         </div>
-
         {/* Filters / Params */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
           <div className="input-group">
-            <span className="input-label">Niche</span>
-            <input type="text" className="input-field" value={creator.niche} disabled style={{ opacity: 0.7 }} />
+            <label htmlFor="outreach-niche" className="input-label">Niche</label>
+            <input id="outreach-niche" type="text" className="input-field" value={creator.niche} disabled style={{ opacity: 0.7 }} />
           </div>
           <div className="input-group">
-            <span className="input-label">Collaboration Type</span>
+            <label htmlFor="outreach-collab-type" className="input-label">Collaboration Type</label>
             <select 
+              id="outreach-collab-type"
               value={collabType} 
               onChange={(e) => setCollabType(e.target.value)} 
               className="input-field"
@@ -206,13 +206,22 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
 
         {/* Feedback alerts */}
         {errorMsg && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', padding: '10px', fontSize: '13px' }}>
-            ⚠ {errorMsg}
+          <div style={{ background: 'var(--color-status-error-bg)', color: '#fca5a5', border: '1px solid var(--color-status-error)', borderRadius: '6px', padding: '10px', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }} aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            {errorMsg}
           </div>
         )}
         {successMsg && (
-          <div style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', padding: '10px', fontSize: '13px' }}>
-            ✔ {successMsg}
+          <div style={{ background: 'var(--color-status-success-bg)', color: '#12b76a', border: '1px solid var(--color-status-success)', borderRadius: '6px', padding: '10px', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }} aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            {successMsg}
           </div>
         )}
 
@@ -241,8 +250,9 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
                 )}
               </div>
               <div className="input-group">
-                <span className="input-label" style={{ fontSize: '10px' }}>Subject</span>
+                <label htmlFor="outreach-email-subject" className="input-label" style={{ fontSize: '10px' }}>Subject</label>
                 <input 
+                  id="outreach-email-subject"
                   type="text" 
                   className="input-field" 
                   value={emailSubject} 
@@ -250,8 +260,9 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
                 />
               </div>
               <div className="input-group">
-                <span className="input-label" style={{ fontSize: '10px' }}>Email Body</span>
+                <label htmlFor="outreach-email-body" className="input-label" style={{ fontSize: '10px' }}>Email Body</label>
                 <textarea 
+                  id="outreach-email-body"
                   className="input-field" 
                   value={emailBody} 
                   onChange={(e) => setEmailBody(e.target.value)} 
@@ -264,7 +275,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
             {/* DM Outreach Block */}
             <div className="glass" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--secondary)' }}>Instagram DM Pitch (15-30 words)</h4>
+                <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-accent-secondary)' }}>Instagram DM Pitch (15-30 words)</h4>
                 <button 
                   onClick={handleCopyDm} 
                   className="btn btn-secondary" 
@@ -275,8 +286,9 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
                 </button>
               </div>
               <div className="input-group">
-                <span className="input-label" style={{ fontSize: '10px' }}>DM Message</span>
+                <label htmlFor="outreach-dm-body" className="input-label" style={{ fontSize: '10px' }}>DM Message</label>
                 <textarea 
+                  id="outreach-dm-body"
                   className="input-field" 
                   value={dmBody} 
                   onChange={(e) => setDmBody(e.target.value)} 
@@ -285,7 +297,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
                 />
               </div>
             </div>
-            
+
             <button 
               onClick={handleGenerate}
               className="btn btn-secondary"
