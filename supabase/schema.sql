@@ -68,3 +68,22 @@ CREATE TRIGGER update_settings_updated_at
 CREATE INDEX IF NOT EXISTS idx_influencers_niche ON public.influencers(niche);
 CREATE INDEX IF NOT EXISTS idx_influencers_status ON public.influencers(outreach_status);
 CREATE INDEX IF NOT EXISTS idx_influencers_followers ON public.influencers(followers_count);
+
+-- 1. Enable Row Level Security (RLS) on all tables
+ALTER TABLE public.influencers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.outreach_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+
+-- 2. Create public policies so the dashboard can read/write data using the API key
+DROP POLICY IF EXISTS "Enable all access for anon users on influencers" ON public.influencers;
+CREATE POLICY "Enable all access for anon users on influencers"
+ON public.influencers FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anon users on outreach_logs" ON public.outreach_logs;
+CREATE POLICY "Enable all access for anon users on outreach_logs"
+ON public.outreach_logs FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anon users on settings" ON public.settings;
+CREATE POLICY "Enable all access for anon users on settings"
+ON public.settings FOR ALL USING (true) WITH CHECK (true);
+

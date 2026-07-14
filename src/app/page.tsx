@@ -84,24 +84,40 @@ export default function Dashboard() {
     await Promise.all([fetchCreatorsList(), fetchStats()]);
     setLoading(false);
   };
-
   const loadSettings = async () => {
+    // 1. Try loading from localStorage first for immediate local availability
+    if (typeof window !== 'undefined') {
+      const local = localStorage.getItem('creator_match_settings');
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          setSettings(parsed);
+        } catch (e) {
+          console.warn('Failed to parse localStorage settings', e);
+        }
+      }
+    }
+
+    // 2. Fetch from Supabase as backup/sync
     try {
       const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
       if (error && error.code !== 'PGRST116') throw error;
       if (data) {
-        setSettings({
+        const dbSettings = {
           smtp_host: data.smtp_host || '',
           smtp_port: data.smtp_port || 465,
           smtp_user: data.smtp_user || '',
           smtp_pass: data.smtp_pass || '',
           gemini_api_key: data.gemini_api_key || '',
-        });
+        };
+        setSettings(dbSettings);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('creator_match_settings', JSON.stringify(dbSettings));
+        }
       }
       setDbError(null);
     } catch (e: any) {
-      console.warn('Error loading settings:', e.message || e);
-      setDbError('Failed to connect to Supabase database. Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set correctly in your .env.local file.');
+      console.warn('Error loading settings from database:', e.message || e);
     }
   };
 
@@ -109,6 +125,12 @@ export default function Dashboard() {
     e.preventDefault();
     setSavingSettings(true);
     try {
+      // 1. Save to local storage first
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('creator_match_settings', JSON.stringify(settings));
+      }
+
+      // 2. Save to Supabase database
       const { error } = await supabase.from('settings').upsert({
         id: 1,
         ...settings,
@@ -118,7 +140,8 @@ export default function Dashboard() {
       setShowSettings(false);
       setDbError(null);
     } catch (err: any) {
-      alert(`Error saving settings: ${err.message}`);
+      alert(`Error saving settings to database: ${err.message}. (Saved locally in browser)`);
+      setShowSettings(false);
     } finally {
       setSavingSettings(false);
     }

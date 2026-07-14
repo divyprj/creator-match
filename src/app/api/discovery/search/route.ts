@@ -69,6 +69,37 @@ function extractQoruzUrls(html: string): string[] {
   return urls;
 }
 
+const FALLBACK_PROFILES: Record<string, string[]> = {
+  fashion: [
+    'https://qoruz.com/aarohirawat2270',
+    'https://qoruz.com/meetposer',
+    'https://qoruz.com/akshaygupta_ak',
+    'https://qoruz.com/renu_chandra',
+    'https://qoruz.com/ShopDandy',
+  ],
+  beauty: [
+    'https://qoruz.com/kritikakhurana',
+    'https://qoruz.com/malvikasitlaniofficial',
+    'https://qoruz.com/aashnashroff',
+    'https://qoruz.com/aarohirawat2270',
+  ],
+  tech: [
+    'https://qoruz.com/i_ansh_rathi',
+    'https://qoruz.com/technicalguruji',
+    'https://qoruz.com/shlokasrivastava',
+  ],
+  travel: [
+    'https://qoruz.com/bruisedpassports',
+    'https://qoruz.com/shenaztreasury',
+    'https://qoruz.com/larissa_wlc',
+  ],
+  food: [
+    'https://qoruz.com/ranveer.brar',
+    'https://qoruz.com/kabitaskitchen',
+    'https://qoruz.com/shivesh_b',
+  ],
+};
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const niche = searchParams.get('niche');
@@ -80,33 +111,50 @@ export async function GET(request: NextRequest) {
   // Construct the search query
   // DuckDuckGo search query for qoruz profiles with the niche and gmail.com
   const query = `site:qoruz.com "${niche}" "gmail.com"`;
-  const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+  
+  let qoruzUrls: string[] = [];
+  let isFallbackUsed = false;
 
   try {
-    const response = await fetch(ddgUrl, {
+    console.log(`Searching DuckDuckGo Lite for query: ${query}`);
+    const response = await fetch('https://lite.duckduckgo.com/lite/', {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
+      body: `q=${encodeURIComponent(query)}`,
     });
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `DuckDuckGo returned HTTP error: ${response.status}` },
-        { status: response.status }
-      );
+    if (response.ok) {
+      const html = await response.text();
+      // If we hit a bot captcha challenge page, it might return 202 or contain anomaly-modal text
+      if (html.includes('anomaly-modal') || html.includes('captcha')) {
+        console.warn('DuckDuckGo Lite returned a bot captcha challenge page. Using curated fallback profiles.');
+      } else {
+        qoruzUrls = extractQoruzUrls(html);
+        console.log(`DuckDuckGo Lite search completed successfully. Found ${qoruzUrls.length} profile URLs.`);
+      }
+    } else {
+      console.warn(`DuckDuckGo Lite returned HTTP error: ${response.status}. Using curated fallback profiles.`);
     }
-
-    const html = await response.text();
-    const qoruzUrls = extractQoruzUrls(html);
-
-    return NextResponse.json({
-      query,
-      count: qoruzUrls.length,
-      urls: qoruzUrls,
-    });
-  } catch (error: any) {
-    console.error('Error fetching search results:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+  } catch (error) {
+    console.error('Error fetching search results from DuckDuckGo Lite:', error);
   }
+
+  // If search was blocked, empty, or failed, use pre-seeded fallback profiles
+  if (qoruzUrls.length === 0) {
+    isFallbackUsed = true;
+    const nicheKey = niche.toLowerCase().trim();
+    qoruzUrls = FALLBACK_PROFILES[nicheKey] || FALLBACK_PROFILES['fashion'];
+    console.log(`Using fallback profiles for niche "${nicheKey}":`, qoruzUrls);
+  }
+
+  return NextResponse.json({
+    query,
+    count: qoruzUrls.length,
+    urls: qoruzUrls,
+    isFallbackUsed,
+  });
 }
