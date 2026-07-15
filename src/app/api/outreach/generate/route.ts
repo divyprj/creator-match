@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +50,27 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: 'gemini-flash-latest',
-      generationConfig: { responseMimeType: 'application/json' },
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            emailSubject: {
+              type: SchemaType.STRING,
+              description: 'A catchy, professional and friendly email subject line'
+            },
+            emailBody: {
+              type: SchemaType.STRING,
+              description: 'A personalized email proposal strictly between 60 and 90 words'
+            },
+            dmBody: {
+              type: SchemaType.STRING,
+              description: 'A personalized Instagram DM pitch strictly between 15 and 30 words'
+            }
+          },
+          required: ['emailSubject', 'emailBody', 'dmBody']
+        }
+      },
     });
 
     const prompt = `
@@ -96,10 +116,33 @@ Return a JSON object exactly matching this schema:
     
     let generatedData;
     try {
-      generatedData = JSON.parse(responseText);
+      let cleanText = responseText.trim();
+      // Remove markdown code fences if present
+      if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```(?:json)?\n?|```$/g, '').trim();
+      }
+      generatedData = JSON.parse(cleanText);
     } catch (e) {
-      console.error('Failed to parse Gemini JSON response:', responseText);
-      return NextResponse.json({ error: 'Gemini did not return valid JSON' }, { status: 500 });
+      // Fallback: extract JSON from markdown fences or partial response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          generatedData = JSON.parse(jsonMatch[0]);
+        } catch (e2) {
+          // Last resort: manually extract fields with regex
+          const subjectMatch = responseText.match(/"emailSubject"\s*:\s*"([^"]*)"/);
+          const bodyMatch = responseText.match(/"emailBody"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"dmBody|"\s*\})/);
+          const dmMatch = responseText.match(/"dmBody"\s*:\s*"([\s\S]*?)"\s*\}?\s*$/);
+          generatedData = {
+            emailSubject: subjectMatch?.[1] || `Collaboration opportunity with @${creator.handle}`,
+            emailBody: bodyMatch?.[1]?.replace(/\\n/g, '\n') || '',
+            dmBody: dmMatch?.[1]?.replace(/\\n/g, '\n') || '',
+          };
+        }
+      } else {
+        console.error('Failed to parse Gemini JSON response:', responseText);
+        return NextResponse.json({ error: 'Gemini did not return valid JSON' }, { status: 500 });
+      }
     }
 
     return NextResponse.json({

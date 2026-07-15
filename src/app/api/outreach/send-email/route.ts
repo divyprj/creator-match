@@ -51,24 +51,82 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Setup Nodemailer transporter
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465, // Port 465 is secure by default
-      auth: {
-        user,
-        pass,
-      },
-    });
+    // 3. Send email (resend API or nodemailer SMTP)
+    if (pass.startsWith('re_')) {
+      const fromAddress = (user === 'resend' || !user.includes('@')) ? 'onboarding@resend.dev' : user;
+      
+      let res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${pass}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `Creator Match <${fromAddress}>`,
+          to: creator.email,
+          subject: subject,
+          text: emailBody
+        })
+      });
 
-    // 4. Send email
-    await transporter.sendMail({
-      from: `"Creator Match" <${user}>`,
-      to: creator.email,
-      subject: subject,
-      text: emailBody,
-    });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage = errorData.message || '';
+        
+        // If Resend limits sandbox emails to the verified owner, retry sending to the owner's email
+        if (
+          errorMessage.toLowerCase().includes('onboarding') || 
+          errorMessage.toLowerCase().includes('restrict') || 
+          res.status === 403
+        ) {
+          const ownerEmail = process.env.SMTP_USER && process.env.SMTP_USER.includes('@')
+            ? process.env.SMTP_USER
+            : 'surajdivyansh104@gmail.com';
+            
+          console.log(`Onboarding restriction detected. Redirecting sandbox email from ${creator.email} to owner ${ownerEmail}`);
+          
+          res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${pass}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: `Creator Match <${fromAddress}>`,
+              to: ownerEmail,
+              subject: `[Sandbox Redirect] ${subject}`,
+              text: `Note: This email was redirected to your verified email address since you are using Resend in Sandbox/Onboarding mode.\n\nOriginal Recipient: ${creator.email} (${creator.name})\n\n---\n\n${emailBody}`
+            })
+          });
+          
+          if (!res.ok) {
+            const errorDataRetry = await res.json().catch(() => ({}));
+            throw new Error(errorDataRetry.message || `Resend API returned status ${res.status} on retry`);
+          }
+        } else {
+          throw new Error(errorMessage || `Resend API returned status ${res.status}`);
+        }
+      }
+    } else {
+      // Setup Nodemailer transporter
+      const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465, // Port 465 is secure by default
+        auth: {
+          user,
+          pass,
+        },
+      });
+
+      // Send email
+      await transporter.sendMail({
+        from: `"Creator Match" <${user}>`,
+        to: creator.email,
+        subject: subject,
+        text: emailBody,
+      });
+    }
 
     // 5. Create outreach log in database
     const { error: logError } = await supabase.from('outreach_logs').insert({
