@@ -263,4 +263,4 @@ Live URL: https://creator-match-6t97.vercel.app
 
 ## License
 
-This project was built as part of a technical assignment submission.
+This project is licensed under the MIT License.
