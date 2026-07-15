@@ -2,11 +2,13 @@
 
 Creator Match is a premium web dashboard designed for discovering, organizing, and executing outreach campaigns for social media influencers. Built with Next.js (App Router), Supabase, Google Gemini AI, and Resend, the application automates the entire creator-sourcing and message-personalization lifecycle.
 
+Live Deployment: https://creator-match-6t97.vercel.app
+
 ---
 
 ## Screenshots
 
-### Main Dashboard Loading Creator List
+### Main Dashboard
 ![Main Dashboard](public/screenshots/dashboard.png)
 
 ### Personalized Outreach Modal Powered by Gemini AI
@@ -40,7 +42,7 @@ Creator Match is a premium web dashboard designed for discovering, organizing, a
 ### 5. Sending Layer
 * Native Resend REST API Client: Automatically detects Resend API keys (passwords starting with re_). Sends emails over direct HTTPS REST endpoints, eliminating datacenter IP blocks and SMTP connection timeouts.
 * Nodemailer SMTP Client: Falls back to a standard SMTP transporter for personal mail hosting or custom mail servers.
-* Sandbox Redirection Fallback: Detects Resend sandbox restrictions and automatically redirects emails to your verified account owner address (surajdivyansh104@gmail.com) with a Sandbox Redirect tag, preventing runtime crashes and ensuring full demo verification.
+* Sandbox Redirection Fallback: Detects Resend sandbox restrictions and automatically redirects emails to the verified account owner address with a Sandbox Redirect tag, preventing runtime crashes and ensuring full demo verification.
 * Outreach Tracking: Commits attempts (subject, type, body, status) to the outreach_logs database table and updates the creator's status in real-time.
 
 ### 6. CSV Data Export
@@ -50,11 +52,50 @@ Creator Match is a premium web dashboard designed for discovering, organizing, a
 
 ## Technology Stack
 
-* Frontend Core: Next.js 16 (App Router), React 19, TypeScript
-* Styling: Vanilla CSS, Tailwind CSS
-* Database Layer: Supabase (PostgreSQL)
-* AI Personalization: Google Generative AI SDK (gemini-flash-latest)
-* Mail Delivery: Nodemailer SMTP, Resend HTTPS API
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router), React 19, TypeScript |
+| Styling | Vanilla CSS |
+| Database | Supabase (PostgreSQL) |
+| AI Personalization | Google Generative AI SDK (gemini-flash-latest) |
+| Mail Delivery | Nodemailer SMTP, Resend HTTPS REST API |
+| Deployment | Vercel |
+
+---
+
+## Project Structure
+
+```
+creator-match/
+  public/
+    screenshots/          -- Dashboard and outreach modal screenshots
+  src/
+    app/
+      page.tsx             -- Main dashboard page
+      api/
+        discovery/
+          search/route.ts  -- Influencer search and import endpoint
+          enrich/route.ts  -- Profile enrichment endpoint
+        outreach/
+          generate/route.ts -- Gemini AI outreach generation endpoint
+          send-email/route.ts -- SMTP and Resend email sending endpoint
+        export/
+          csv/route.ts     -- CSV export endpoint
+    lib/
+      supabaseClient.ts   -- Supabase client initialization
+    types.ts              -- Shared TypeScript interfaces
+    tests/
+      test_supabase.js    -- Supabase connectivity test
+      test_gemini.js      -- Gemini API test
+      test_smtp.js        -- SMTP connectivity test
+  supabase/
+    schema.sql            -- Database schema and RLS policies
+  install.bat             -- Dependency installer
+  run.bat                 -- Start dev server and open browser
+  stop.bat                -- Stop dev server and close browser
+  uninstall.bat           -- Remove dependencies and build cache
+  repair.bat              -- Revert to last working GitHub version
+```
 
 ---
 
@@ -128,7 +169,21 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
 
 ---
 
-## Local Setup and Running
+## Quick Start (Windows)
+
+The project includes batch scripts for one-click setup and management:
+
+| Script | Description |
+|---|---|
+| `install.bat` | Installs all project dependencies and verifies environment configuration. |
+| `run.bat` | Starts the development server and automatically opens the browser to localhost:3000. |
+| `stop.bat` | Stops the development server and closes the browser tab. |
+| `uninstall.bat` | Removes node_modules, .next build cache, and package-lock.json. |
+| `repair.bat` | Reverts all source code to the latest working version from GitHub, preserves .env.local, and reinstalls dependencies. |
+
+---
+
+## Manual Setup
 
 1. Install project dependencies:
    ```bash
@@ -138,14 +193,14 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
    ```bash
    npm run dev
    ```
-3. Open [http://localhost:3000](http://localhost:3000) in your web browser.
+3. Open http://localhost:3000 in your web browser.
 
 ---
 
 ## API Routes
 
 ### 1. Discover Search
-* Endpoint: `POST /api/discovery/search`
+* Endpoint: POST /api/discovery/search
 * Description: Searches and imports creators into Supabase based on niche and location.
 * Payload:
   ```json
@@ -156,7 +211,7 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
   ```
 
 ### 2. Discover Enrich
-* Endpoint: `POST /api/discovery/enrich`
+* Endpoint: POST /api/discovery/enrich
 * Description: Enriches profiles with contact details, statistics, and recent content.
 * Payload:
   ```json
@@ -166,7 +221,7 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
   ```
 
 ### 3. Generate Outreach
-* Endpoint: `POST /api/outreach/generate`
+* Endpoint: POST /api/outreach/generate
 * Description: Generates personalized DM and Email proposals via Gemini API.
 * Payload:
   ```json
@@ -177,7 +232,7 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
   ```
 
 ### 4. Send Email
-* Endpoint: `POST /api/outreach/send-email`
+* Endpoint: POST /api/outreach/send-email
 * Description: Sends outreach proposals via SMTP or Resend API.
 * Payload:
   ```json
@@ -187,3 +242,25 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
     "body": "Email body content"
   }
   ```
+
+---
+
+## Deployment
+
+The application is deployed on Vercel with the following environment variables configured in the Vercel project dashboard:
+
+* NEXT_PUBLIC_SUPABASE_URL
+* NEXT_PUBLIC_SUPABASE_ANON_KEY
+* GEMINI_API_KEY
+* SMTP_HOST
+* SMTP_PORT
+* SMTP_USER
+* SMTP_PASS
+
+Live URL: https://creator-match-6t97.vercel.app
+
+---
+
+## License
+
+This project was built as part of a technical assignment submission.
