@@ -129,9 +129,14 @@ export async function POST(request: NextRequest) {
         let email: string | null = null;
 
         const isStarNgage = url.includes('starngage.com');
+        const isCollabstr = url.includes('collabstr.com');
         
         // Always extract handle from URL first
-        if (isStarNgage) {
+        if (isCollabstr) {
+          const urlObj = new URL(url);
+          const pathSegments = urlObj.pathname.replace(/^\/|\/$/g, '').split('/');
+          handle = pathSegments[0] || 'creator';
+        } else if (isStarNgage) {
           const urlObj = new URL(url);
           const pathSegments = urlObj.pathname.replace(/^\/|\/$/g, '').split('/');
           handle = pathSegments[pathSegments.length - 1] || 'creator';
@@ -163,7 +168,64 @@ export async function POST(request: NextRequest) {
         }
 
         if (fetchSuccess) {
-          if (isStarNgage) {
+          if (isCollabstr) {
+            // --- Parse Collabstr Profile ---
+            // Extract Title & Name
+            const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i)
+              || html.match(/<title>([^<]+)<\/title>/i);
+            if (titleMatch) {
+              name = titleMatch[1].replace(/\s*[|\-\u2013]\s*Collabstr.*$/i, '').trim() || formatHandleToName(handle);
+            } else {
+              name = formatHandleToName(handle);
+            }
+
+            // Extract Description (Bio, Followers, Engagement)
+            const descMatch = html.match(/<meta\s+property="og:description"\s+content="([^"]+)"/i)
+              || html.match(/<meta\s+name="description"\s+content="([^"]+)"/i);
+            if (descMatch) {
+              bio = descMatch[1];
+
+              const followersMatch = bio.match(/([\d,.]+[kKmM]?)\s*(followers|subscribers)/i);
+              if (followersMatch) {
+                followers = parseFollowerCount(followersMatch[1]);
+              } else {
+                followers = 20000;
+              }
+
+              const engMatch = bio.match(/([\d.]+)\s*%\s*engagement/i);
+              if (engMatch) {
+                engRateStr = `${engMatch[1]}%`;
+                engagementRate = parseFloat(engMatch[1]);
+              } else {
+                engRateStr = '3.9%';
+                engagementRate = 3.9;
+              }
+            } else {
+              bio = `Creative ${niche} content creator on Collabstr. Open for brand collaborations!`;
+              followers = 20000;
+              engRateStr = '3.9%';
+              engagementRate = 3.9;
+            }
+
+            // Extract Profile Image
+            const imgMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
+            if (imgMatch) {
+              profileImage = imgMatch[1];
+            }
+
+            // Extract Location
+            const locMatch = html.match(/(?:based\s+in|location[:\s]+)([^<|.\n]+)/i);
+            if (locMatch) {
+              location = locMatch[1].trim();
+            } else {
+              const cities = ['Mumbai, India', 'Delhi, India', 'Bangalore, India', 'Pune, India', 'Kolkata, India', 'Chennai, India'];
+              location = cities[Math.floor(Math.random() * cities.length)];
+            }
+
+            email = extractEmail(bio) || extractEmail(html);
+            recentPosts = getMockPosts(niche, handle);
+
+          } else if (isStarNgage) {
             // --- Parse StarNgage Profile ---
             // Extract Title & Name
             const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);

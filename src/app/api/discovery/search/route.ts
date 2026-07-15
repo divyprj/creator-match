@@ -98,6 +98,39 @@ function extractUrls(html: string): string[] {
         }
       }
 
+      // 3. Extract Collabstr URLs
+      if (decodedUrl.includes('collabstr.com')) {
+        let collabstrUrl = '';
+        if (decodedUrl.includes('uddg=')) {
+          const parts = decodedUrl.split('uddg=');
+          if (parts.length > 1) {
+            const potential = parts[1].split('&')[0];
+            if (potential.startsWith('http')) {
+              collabstrUrl = potential;
+            }
+          }
+        } else if (decodedUrl.startsWith('http') || decodedUrl.startsWith('https')) {
+          collabstrUrl = decodedUrl;
+        }
+
+        if (collabstrUrl) {
+          const urlObj = new URL(collabstrUrl);
+          const path = urlObj.pathname.replace(/^\/|\/$/g, '');
+          const segments = path.split('/');
+          const handle = segments[0];
+
+          if (handle && !reserved.includes(handle.toLowerCase())
+              && !handle.startsWith('instagram-influencers')
+              && !handle.startsWith('tiktok-influencers')
+              && !handle.startsWith('youtube-influencers')) {
+            const finalUrl = `https://collabstr.com/${handle}`;
+            if (!urls.includes(finalUrl)) {
+              urls.push(finalUrl);
+            }
+          }
+        }
+      }
+
     } catch (e) {
       // Ignore invalid URLs
     }
@@ -119,6 +152,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/thestylecompanion',
     'https://starngage.com/app/global/influencer/instagram/nikitasharma_style',
     'https://starngage.com/app/global/influencer/instagram/aman_fashion_hub',
+    'https://collabstr.com/khushi-singh',
+    'https://collabstr.com/kalakaaribydhwani',
+    'https://collabstr.com/maahi-style',
+    'https://collabstr.com/ranjeet-kumar',
+    'https://collabstr.com/pooja-fashion',
+    'https://collabstr.com/bhavna-lifestyle',
+    'https://collabstr.com/anushka-tomar',
+    'https://collabstr.com/goswami-ruchi',
+    'https://collabstr.com/harshita-rajak',
+    'https://collabstr.com/vaishnavi-style',
   ],
   beauty: [
     'https://qoruz.com/kritikakhurana',
@@ -133,6 +176,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/glam_up_priya',
     'https://starngage.com/app/global/influencer/instagram/himani_makeup',
     'https://starngage.com/app/global/influencer/instagram/kavya_beauty',
+    'https://collabstr.com/megha-skincare',
+    'https://collabstr.com/ganiya-beauty',
+    'https://collabstr.com/tiasa-ray',
+    'https://collabstr.com/anamika-sudheendran',
+    'https://collabstr.com/anshika-singh',
+    'https://collabstr.com/nandini-kukreti',
+    'https://collabstr.com/shruti-sharma',
+    'https://collabstr.com/sana-khan-makeup',
+    'https://collabstr.com/rakhi-rathiya',
+    'https://collabstr.com/sushma-singh',
   ],
   tech: [
     'https://qoruz.com/i_ansh_rathi',
@@ -147,6 +200,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/dev_tech_show',
     'https://starngage.com/app/global/influencer/instagram/amit_tech_talk',
     'https://starngage.com/app/global/influencer/instagram/varun_gadgets',
+    'https://collabstr.com/apnatech',
+    'https://collabstr.com/gadget-byte',
+    'https://collabstr.com/amar-kumar-tech',
+    'https://collabstr.com/aapkatech',
+    'https://collabstr.com/android-amaan',
+    'https://collabstr.com/tech-burner-india',
+    'https://collabstr.com/digital-pratik',
+    'https://collabstr.com/smart-gadgets-review',
+    'https://collabstr.com/rajiv-tech-review',
+    'https://collabstr.com/deepak-tech-tips',
   ],
   food: [
     'https://qoruz.com/ranveer.brar',
@@ -161,6 +224,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/thefoodranger',
     'https://starngage.com/app/global/influencer/instagram/spicy_treats',
     'https://starngage.com/app/global/influencer/instagram/bakers_delight',
+    'https://collabstr.com/priyanka-rana',
+    'https://collabstr.com/monika-sharma',
+    'https://collabstr.com/naman-goyal',
+    'https://collabstr.com/san-samayal',
+    'https://collabstr.com/arya-akhil',
+    'https://collabstr.com/shalini-veggie',
+    'https://collabstr.com/praveen-natarajan',
+    'https://collabstr.com/manal-miyani',
+    'https://collabstr.com/deepa-kitchen',
+    'https://collabstr.com/amit-foodie',
   ],
   fitness: [
     'https://qoruz.com/guru_mann',
@@ -175,6 +248,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/vikram_iron_gym',
     'https://starngage.com/app/global/influencer/instagram/shakti_athletics',
     'https://starngage.com/app/global/influencer/instagram/priya_fit_journey',
+    'https://collabstr.com/anjali-verma',
+    'https://collabstr.com/annie-rawat',
+    'https://collabstr.com/jagriti-choudhary',
+    'https://collabstr.com/shailee-singh',
+    'https://collabstr.com/mrs-pradhayini',
+    'https://collabstr.com/priya-fitness',
+    'https://collabstr.com/rohit-wellness',
+    'https://collabstr.com/neha-yoga-life',
+    'https://collabstr.com/vikram-gym',
+    'https://collabstr.com/kavita-health',
   ],
   gaming: [
     'https://qoruz.com/mortal_gaming',
@@ -189,6 +272,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/payal_gaming',
     'https://starngage.com/app/global/influencer/instagram/triggered_insaan',
     'https://starngage.com/app/global/influencer/instagram/live_insaan',
+    'https://collabstr.com/chaitanya-gaming',
+    'https://collabstr.com/arun-karthick',
+    'https://collabstr.com/dipender-bishnoi',
+    'https://collabstr.com/harshit-tanwar',
+    'https://collabstr.com/gaming-with-raj',
+    'https://collabstr.com/pixel-play-india',
+    'https://collabstr.com/noob-to-pro-gaming',
+    'https://collabstr.com/esports-arjun',
+    'https://collabstr.com/mobile-gamer-india',
+    'https://collabstr.com/clutch-king-gaming',
   ],
   finance: [
     'https://qoruz.com/sharanhegde',
@@ -203,6 +296,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/market_yogi',
     'https://starngage.com/app/global/influencer/instagram/neha_finance_tips',
     'https://starngage.com/app/global/influencer/instagram/tax_planner_india',
+    'https://collabstr.com/finance-with-sharan',
+    'https://collabstr.com/money-mentor-india',
+    'https://collabstr.com/invest-with-siddharth',
+    'https://collabstr.com/rupee-tales',
+    'https://collabstr.com/savings-guru-india',
+    'https://collabstr.com/stock-savvy-india',
+    'https://collabstr.com/mutual-fund-easy',
+    'https://collabstr.com/budgeting-with-neha',
+    'https://collabstr.com/wealth-wise-india',
+    'https://collabstr.com/tax-tips-india',
   ],
   education: [
     'https://qoruz.com/khanacademy',
@@ -217,6 +320,16 @@ const FALLBACK_PROFILES: Record<string, string[]> = {
     'https://starngage.com/app/global/influencer/instagram/gk_daily_india',
     'https://starngage.com/app/global/influencer/instagram/science_explained_hindi',
     'https://starngage.com/app/global/influencer/instagram/math_shortcuts',
+    'https://collabstr.com/learn-with-priya',
+    'https://collabstr.com/edtech-india',
+    'https://collabstr.com/study-smart-india',
+    'https://collabstr.com/code-with-rahul',
+    'https://collabstr.com/science-guru-india',
+    'https://collabstr.com/upsc-prep-daily',
+    'https://collabstr.com/english-fluency',
+    'https://collabstr.com/math-made-easy',
+    'https://collabstr.com/career-coach-india',
+    'https://collabstr.com/ias-mentor-india',
   ],
 };
 
@@ -241,7 +354,7 @@ export async function GET(request: NextRequest) {
   }
 
   // DuckDuckGo search query targeting Qoruz and StarNgage profiles
-  const query = `(site:qoruz.com OR site:starngage.com/app/global/influencer/instagram) "${niche}" "gmail.com"`;
+  const query = `(site:qoruz.com OR site:starngage.com/app/global/influencer/instagram OR site:collabstr.com) "${niche}" "gmail.com"`;
   
   let foundUrls: string[] = [];
   let isFallbackUsed = false;
