@@ -342,27 +342,16 @@ export async function POST(request: NextRequest) {
             profileImage = pageData.profile_image_original || profileImage;
           }
         } else {
-          // --- Graceful Fallback Profile Generation (when blocked 403 or page is 404) ---
-          console.log(`Graceful fallback triggered for ${url} (status: ${responseStatus})`);
-          name = formatHandleToName(handle);
-          bio = `Creative ${niche} influencer sharing lifestyle posts, updates, and styling ideas. Open to collaborations!`;
-          
-          // Generate realistic micro-influencer stats
-          followers = Math.round(9000 + Math.random() * 85000);
-          const rateVal = parseFloat((1.5 + Math.random() * 4.5).toFixed(2));
-          engRateStr = `${rateVal}%`;
-          engagementRate = rateVal;
-          
-          const cities = ['Mumbai, India', 'Delhi, India', 'Bangalore, India', 'Hyderabad, India', 'Pune, India', 'Lucknow, India', 'Jaipur, India'];
-          location = cities[Math.floor(Math.random() * cities.length)];
-          
-          // Generate a beautiful, unique Unsplash avatar
-          const imgIds = ['1534528741775-53994a69daeb', '1507003211169-0a1dd7228f2d', '1494790108377-be9c29b29330', '1500648767791-00dcc994a43e', '1438761681033-6461ffad8d80'];
-          const pickedImg = imgIds[Math.floor(Math.random() * imgIds.length)];
-          profileImage = `https://images.unsplash.com/photo-${pickedImg}?auto=format&fit=crop&w=150&q=80`;
-          
-          email = `${handle.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()}@gmail.com`;
-          recentPosts = getMockPosts(niche, handle);
+          // --- Cannot verify profile data (blocked 403 or page 404) ---
+          // Skip entirely rather than saving fake/random data
+          console.log(`Skipping unverifiable profile: ${url} (status: ${responseStatus})`);
+          results.skipped++;
+          results.details.push({
+            url,
+            status: 'skipped',
+            reason: `Could not verify profile data (HTTP ${responseStatus})`,
+          });
+          continue;
         }
 
         // If still no email found, construct a fallback email so they are not skipped
