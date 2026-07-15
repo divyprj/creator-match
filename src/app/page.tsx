@@ -379,7 +379,7 @@ export default function Dashboard() {
 
 
       {/* Main Dashboard Panel */}
-      <main style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', height: '100vh', width: '100%' }}>
+      <main style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', minHeight: '100vh', width: '100%' }}>
         {/* Header section */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -436,7 +436,7 @@ export default function Dashboard() {
         )}
 
         {/* Creators Table Container */}
-        <div className="glass" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="glass" style={{ display: 'flex', flexDirection: 'column' }}>
           {/* Table Header Filter bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid var(--card-border)', gap: '15px', alignItems: 'center' }}>
             {/* Search Input */}
@@ -491,7 +491,7 @@ export default function Dashboard() {
           </div>
 
           {/* Table */}
-          <div style={{ overflowY: 'auto', flex: 1 }}>
+          <div style={{ overflowX: 'auto' }}>
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}>
                 <div className="loader" style={{ width: '40px', height: '40px', borderWidth: '4px' }} />
