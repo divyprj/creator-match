@@ -272,11 +272,25 @@ export default function Dashboard() {
 
       {/* Sidebar / Filters */}
       <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/icon.svg" alt="Creator Match Logo" style={{ width: '20px', height: '20px', borderRadius: '4px' }} />
-          <h1 style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.02em', color: 'var(--color-text-primary)' }}>
-            CREATOR MATCH
-          </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img src="/icon.svg" alt="Creator Match Logo" style={{ width: '20px', height: '20px', borderRadius: '4px' }} />
+            <h1 style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.02em', color: 'var(--color-text-primary)' }}>
+              CREATOR MATCH
+            </h1>
+          </div>
+          {/* Close button for mobile drawer */}
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="mobile-menu-toggle"
+            aria-label="Close menu"
+            style={{ display: mobileMenuOpen ? 'flex' : 'none' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
 
         {/* Niche Filter */}
@@ -410,12 +424,12 @@ export default function Dashboard() {
 
         <main className="main-content">
         {/* Header section */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold' }}>Dashboard</h2>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>Manage your influencer outreach list and campaigns.</p>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="header-actions" style={{ display: 'flex', gap: '10px' }}>
             <button onClick={() => setShowDiscovery(!showDiscovery)} className="btn btn-primary">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '6px' }} aria-hidden="true">
                 <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2Z"/>
@@ -440,7 +454,7 @@ export default function Dashboard() {
         )}
 
         {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', flexShrink: 0 }}>
+        <div className="stats-grid">
           <div className="glass" style={{ padding: '20px' }}>
             <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Creators</div>
             <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px' }}>{stats.total}</div>
@@ -598,16 +612,55 @@ export default function Dashboard() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Mobile Card Layout */}
+              <div className="mobile-creator-cards">
+                {paginatedCreators.map((c) => (
+                  <div key={c.id} className="mobile-creator-card" onClick={() => setSelectedCreator(c)}>
+                    {c.profile_image ? (
+                      <img
+                        src={c.profile_image}
+                        alt={c.name}
+                        className="mobile-creator-avatar"
+                        onError={(e) => {
+                          e.currentTarget.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44"><rect width="44" height="44" fill="%23262626" rx="22" /><circle cx="22" cy="15" r="7" fill="%23737373" /><path d="M8 36c0-6.1 5-11 11-11h6c6.1 0 11 5 11 11z" fill="%23737373" /></svg>`;
+                        }}
+                      />
+                    ) : (
+                      <div className="mobile-creator-avatar-placeholder">{c.name[0]}</div>
+                    )}
+                    <div className="mobile-creator-info">
+                      <div className="mobile-creator-name">{c.name}</div>
+                      <div className="mobile-creator-handle">@{c.handle}</div>
+                      <div className="mobile-creator-meta">
+                        <span className="mobile-creator-meta-item">
+                          {c.engagement_rate_str || (c.engagement_rate ? `${c.engagement_rate}%` : 'N/A')} eng.
+                        </span>
+                        {c.location && (
+                          <>
+                            <span className="mobile-creator-meta-dot" />
+                            <span className="mobile-creator-meta-item">{c.location}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mobile-creator-right">
+                      <div className="mobile-creator-followers">{formatFollowers(c.followers_count)}</div>
+                      <div className="mobile-creator-niche">{c.niche}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
           {/* Pagination Controls */}
           {!loading && creators.length > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderTop: '1px solid var(--card-border)', gap: '15px', background: 'rgba(0,0,0,0.2)' }}>
+            <div className="pagination-bar">
               <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                 Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, creators.length)} of {creators.length} creators
               </span>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div className="pagination-controls">
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
@@ -617,7 +670,7 @@ export default function Dashboard() {
                   Previous
                 </button>
                 <span style={{ fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: '500' }}>
-                  Page {currentPage} of {totalPages || 1}
+                  {currentPage} / {totalPages || 1}
                 </span>
                 <button
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
