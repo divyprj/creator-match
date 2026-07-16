@@ -106,7 +106,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
   );
 
   return (
-    <div className="glass" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', overflow: 'hidden' }}>
+    <div className="glass" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
 
       {loading && (
         <div style={{ position: 'absolute', top: '-50%', left: '-50%', right: '-50%', bottom: '-50%', background: 'radial-gradient(circle, rgba(0, 149, 246, 0.03) 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />

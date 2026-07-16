@@ -384,7 +384,7 @@ export default function Dashboard() {
       {/* Main Dashboard Panel */}
       <main className="main-content">
         {/* Header section */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold' }}>Dashboard</h2>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>Manage your influencer outreach list and campaigns.</p>
@@ -414,7 +414,7 @@ export default function Dashboard() {
         )}
 
         {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', flexShrink: 0 }}>
           <div className="glass" style={{ padding: '20px' }}>
             <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Creators</div>
             <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '6px' }}>{stats.total}</div>
@@ -439,7 +439,7 @@ export default function Dashboard() {
         )}
 
         {/* Creators Table Container */}
-        <div className="glass" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="glass" style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           {/* Table Header Filter bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid var(--card-border)', gap: '15px', alignItems: 'center' }}>
             {/* Search Input */}
