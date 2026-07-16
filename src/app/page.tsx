@@ -262,15 +262,13 @@ export default function Dashboard() {
 
   return (
     <>
-      {/* Mobile Sidebar Backdrop - outside grid to avoid overflow clip */}
+      {/* Mobile Sidebar Backdrop */}
       {mobileMenuOpen && (
         <div 
           className="mobile-sidebar-backdrop" 
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
-
-    <div className="dashboard-grid">
 
       {/* Sidebar / Filters */}
       <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
@@ -406,6 +404,7 @@ export default function Dashboard() {
         </div>
       </aside>
 
+      <div className={`dashboard-grid ${mobileMenuOpen ? 'menu-open' : ''}`}>
 
       {/* Main Dashboard Panel */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
