@@ -261,14 +261,16 @@ export default function Dashboard() {
   const paginatedCreators = creators.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="dashboard-grid">
-      {/* Mobile Sidebar Backdrop */}
+    <>
+      {/* Mobile Sidebar Backdrop - outside grid to avoid overflow clip */}
       {mobileMenuOpen && (
         <div 
           className="mobile-sidebar-backdrop" 
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
+
+    <div className="dashboard-grid">
 
       {/* Sidebar / Filters */}
       <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
@@ -798,5 +800,6 @@ export default function Dashboard() {
       )}
 
     </div>
+    </>
   );
 }
