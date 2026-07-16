@@ -304,18 +304,19 @@ body {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    cursor: pointer;
   }
-}
 
-select.input-field option {
-  background: #1a1a2e;
-  color: #e0e0e0;
-  padding: 8px 12px;
-}
+  select.input-field option {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    padding: 8px 12px;
+  }
 
-select.input-field option:checked {
-  background: linear-gradient(90deg, var(--primary), var(--color-accent-primary));
-  color: #fff;
+  select.input-field option:checked {
+    background: linear-gradient(90deg, var(--primary), var(--color-accent-primary));
+    color: #fff;
+  }
 }
 
 /* Slider Customization */
