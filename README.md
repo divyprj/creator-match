@@ -14,6 +14,18 @@ Live Deployment: https://creator-match-6t97.vercel.app
 ### Personalized Outreach Modal Powered by Gemini AI
 ![Personalized Outreach Modal](public/screenshots/outreach.png)
 
+### Mobile UI
+
+<p align="center">
+  <img src="screenshots/mobile-dashboard.png" alt="Mobile Dashboard" width="280"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/mobile-creators.png" alt="Mobile Creator Cards" width="280"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/mobile-sidebar.png" alt="Mobile Sidebar Drawer" width="280"/>
+</p>
+
+*Left: Mobile dashboard with stats grid and creator cards • Center: Scrollable creator list with pagination • Right: Glassmorphism sidebar drawer with filters*
+
 ---
 
 ## Core Features
