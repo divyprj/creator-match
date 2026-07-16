@@ -226,7 +226,8 @@ body {
 .dashboard-grid {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Sidebar styling */
@@ -238,6 +239,26 @@ body {
   gap: 30px;
   background: rgba(9, 9, 11, 0.5);
   backdrop-filter: blur(10px);
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Main Dashboard Panel */
+.main-content {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100vh;
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Table scroll container */
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px;
 }
 
 /* Form inputs */
@@ -429,10 +450,15 @@ body {
     height: auto;
   }
 
-  main {
+  .main-content, main {
     padding: 16px !important;
     height: auto !important;
     overflow-y: visible !important;
+  }
+
+  .table-scroll-container {
+    max-height: none;
+    overflow-y: visible;
   }
 
   /* Adjust stats grid to 2 columns on mobile */

@@ -379,7 +379,7 @@ export default function Dashboard() {
 
 
       {/* Main Dashboard Panel */}
-      <main style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', minHeight: '100vh', width: '100%' }}>
+      <main className="main-content">
         {/* Header section */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -491,7 +491,7 @@ export default function Dashboard() {
           </div>
 
           {/* Table */}
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-scroll-container">
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}>
                 <div className="loader" style={{ width: '40px', height: '40px', borderWidth: '4px' }} />
