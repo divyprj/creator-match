@@ -504,7 +504,7 @@ body {
 }
 
 /* Blur the main content when mobile sidebar is open */
-.dashboard-grid.menu-open {
+.main-content-blur {
   filter: blur(8px);
   pointer-events: none;
 }

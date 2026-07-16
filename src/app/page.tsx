@@ -261,7 +261,7 @@ export default function Dashboard() {
   const paginatedCreators = creators.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <>
+    <div className="dashboard-grid">
       {/* Mobile Sidebar Backdrop */}
       {mobileMenuOpen && (
         <div 
@@ -404,10 +404,8 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      <div className={`dashboard-grid ${mobileMenuOpen ? 'menu-open' : ''}`}>
-
       {/* Main Dashboard Panel */}
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+      <div className={mobileMenuOpen ? 'main-content-blur' : ''} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
         {/* Mobile Header Bar */}
         <div className="mobile-header">
           <button onClick={() => setMobileMenuOpen(true)} className="mobile-menu-toggle" aria-label="Open menu">
@@ -799,6 +797,5 @@ export default function Dashboard() {
       )}
 
     </div>
-    </>
   );
 }
