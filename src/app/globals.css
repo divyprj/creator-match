@@ -294,27 +294,25 @@ body {
   box-shadow: 0 0 8px var(--primary-glow);
 }
 
-/* Select Dropdown Glassmorphism */
-select.input-field {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
-  border-radius: 10px;
-  cursor: pointer;
+/* Select Dropdown - Desktop Only */
+@media (min-width: 769px) {
+  select.input-field {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
 }
 
 select.input-field option {
   background: #1a1a2e;
   color: #e0e0e0;
-  padding: 10px 12px;
-  border-radius: 0;
+  padding: 8px 12px;
 }
 
-select.input-field option:hover,
 select.input-field option:checked {
   background: linear-gradient(90deg, var(--primary), var(--color-accent-primary));
   color: #fff;
