@@ -173,7 +173,10 @@ export default function Dashboard() {
       }
 
       // Follower count range filter
-      query = query.gte('followers_count', minFollowers).lte('followers_count', maxFollowers);
+      query = query.gte('followers_count', minFollowers);
+      if (maxFollowers < 10000000) {
+        query = query.lte('followers_count', maxFollowers);
+      }
 
       // Location search
       if (locationSearch.trim()) {
@@ -526,7 +529,14 @@ export default function Dashboard() {
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           {c.profile_image ? (
-                            <img src={c.profile_image} alt={c.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                            <img 
+                              src={c.profile_image} 
+                              alt={c.name} 
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} 
+                              onError={(e) => {
+                                e.currentTarget.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><rect width="32" height="32" fill="%23262626" /><circle cx="16" cy="11" r="5" fill="%23737373" /><path d="M6 26c0-4.4 3.6-8 8-8h4c4.4 0 8 3.6 8 8z" fill="%23737373" /></svg>`;
+                              }}
+                            />
                           ) : (
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{c.name[0]}</div>
                           )}
