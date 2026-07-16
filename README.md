@@ -60,6 +60,18 @@ Live Deployment: https://creator-match-6t97.vercel.app
 ### 6. CSV Data Export
 * Renders and compiles the currently filtered or searched influencer table into a downloadable CSV file.
 
+### 7. Interactive Column Sorting
+* Multi-Field Sorting: Users can click on table headers (Name, Niche, Followers, Engagement, Location) to sort ascending or descending.
+* Visual Indicators: Displays direction arrows (↑/↓) next to the active sorted column header.
+
+### 8. Live Niche Distribution Analytics
+* Animated Visuals: Displays a horizontal bar chart visualizing the frequency of each niche in the current database.
+* Dynamic Updates: Automatically adjusts in real-time as new creators are discovered or filters are modified.
+
+### 9. Premium Toast Notifications
+* Success & Error Toasts: Replaces standard alert dialogs with custom, animated, glassmorphic toast notification cards.
+* Mobile-Responsive: Repositioned to center-bottom on mobile viewports for optimal thumb reach.
+
 ---
 
 ## Technology Stack
