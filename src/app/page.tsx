@@ -550,7 +550,7 @@ export default function Dashboard() {
                 <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, maxWidth: '280px' }}>Click "Discover Influencers" above to build your database!</p>
               </div>
             ) : (
-
+              <>
               <table className="creator-table">
                 <thead>
                   <tr>
@@ -651,6 +651,7 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
+              </>
             )}
           </div>
 
