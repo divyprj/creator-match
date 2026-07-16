@@ -48,6 +48,30 @@ export default function Dashboard() {
   const [showDiscovery, setShowDiscovery] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Sort States
+  const [sortField, setSortField] = useState<string>('followers_count');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Toast Notifications
+  const [toasts, setToasts] = useState<Array<{id: number; message: string; type: 'success' | 'error' | 'info'}>>([]);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
   // Settings State
   const [settings, setSettings] = useState<AppSettings>({
     smtp_host: '',
@@ -97,10 +121,10 @@ export default function Dashboard() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('creator_match_settings', JSON.stringify(settings));
       }
-      alert('Settings saved successfully in your browser! (Fallbacks to server-side env vars if any field is left empty)');
+      showToast('Settings saved successfully!', 'success');
       setShowSettings(false);
     } catch (err: any) {
-      alert(`Error saving settings locally: ${err.message}`);
+      showToast(`Error: ${err.message}`, 'error');
     } finally {
       setSavingSettings(false);
     }
@@ -154,6 +178,7 @@ export default function Dashboard() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('CSV exported successfully!', 'success');
   };
 
   const fetchCreatorsList = async () => {
@@ -257,8 +282,36 @@ export default function Dashboard() {
     setSelectedNiche('All'); // Clear explicit niche dropdown when segment is active
   };
 
-  const totalPages = Math.ceil(creators.length / itemsPerPage);
-  const paginatedCreators = creators.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // Sort creators client-side
+  const sortedCreators = [...creators].sort((a, b) => {
+    let aVal: any, bVal: any;
+    switch (sortField) {
+      case 'name': aVal = a.name?.toLowerCase() || ''; bVal = b.name?.toLowerCase() || ''; break;
+      case 'niche': aVal = a.niche?.toLowerCase() || ''; bVal = b.niche?.toLowerCase() || ''; break;
+      case 'followers_count': aVal = a.followers_count || 0; bVal = b.followers_count || 0; break;
+      case 'engagement_rate': aVal = a.engagement_rate || 0; bVal = b.engagement_rate || 0; break;
+      case 'location': aVal = a.location?.toLowerCase() || ''; bVal = b.location?.toLowerCase() || ''; break;
+      default: aVal = a.followers_count || 0; bVal = b.followers_count || 0;
+    }
+    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedCreators.length / itemsPerPage);
+  const paginatedCreators = sortedCreators.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Niche distribution for analytics
+  const nicheStats = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    creators.forEach(c => {
+      const niche = c.niche || 'Other';
+      counts[niche] = (counts[niche] || 0) + 1;
+    });
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const max = entries.length > 0 ? entries[0][1] : 1;
+    return { entries, max };
+  }, [creators]);
 
   return (
     <div className="dashboard-grid">
@@ -472,6 +525,24 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Niche Distribution Chart */}
+        {!loading && creators.length > 0 && (
+          <div className="glass" style={{ padding: '16px', borderRadius: '12px' }}>
+            <h4 style={{ fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>Niche Distribution</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {nicheStats.entries.slice(0, 6).map(([niche, count]) => (
+                <div key={niche} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', width: '70px', flexShrink: 0, textAlign: 'right' }}>{niche}</span>
+                  <div style={{ flex: 1, height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                    <div className="niche-bar" style={{ width: `${(count / nicheStats.max) * 100}%`, height: '100%', borderRadius: '3px', background: 'linear-gradient(90deg, var(--primary), var(--color-accent-primary))' }} />
+                  </div>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-primary)', width: '24px', flexShrink: 0 }}>{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Discovery Panel Expansion */}
         {showDiscovery && (
           <DiscoveryPanel onDiscoveryComplete={handleDiscoveryComplete} />
@@ -553,11 +624,21 @@ export default function Dashboard() {
               <table className="creator-table">
                 <thead>
                   <tr>
-                    <th>Influencer</th>
-                    <th>Niche</th>
-                    <th>Followers</th>
-                    <th>Engagement</th>
-                    <th>Location</th>
+                    <th onClick={() => handleSort('name')} className="sortable-th">
+                      Influencer {sortField === 'name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                    </th>
+                    <th onClick={() => handleSort('niche')} className="sortable-th">
+                      Niche {sortField === 'niche' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                    </th>
+                    <th onClick={() => handleSort('followers_count')} className="sortable-th">
+                      Followers {sortField === 'followers_count' ? (sortDirection === 'asc' ? '↑' : '↓') : '↓'}
+                    </th>
+                    <th onClick={() => handleSort('engagement_rate')} className="sortable-th">
+                      Engagement {sortField === 'engagement_rate' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                    </th>
+                    <th onClick={() => handleSort('location')} className="sortable-th">
+                      Location {sortField === 'location' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                    </th>
                     <th>Email</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -658,7 +739,7 @@ export default function Dashboard() {
           {!loading && creators.length > 0 && (
             <div className="pagination-bar">
               <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, creators.length)} of {creators.length} creators
+                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, sortedCreators.length)} of {sortedCreators.length} creators
               </span>
               <div className="pagination-controls">
                 <button
@@ -795,6 +876,16 @@ export default function Dashboard() {
           </form>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
+            <span>{toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : 'ℹ'}</span>
+            {toast.message}
+          </div>
+        ))}
+      </div>
 
     </div>
   );
