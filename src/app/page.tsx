@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [activeOutreachCreator, setActiveOutreachCreator] = useState<Creator | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showDiscovery, setShowDiscovery] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Settings State
   const [settings, setSettings] = useState<AppSettings>({
@@ -261,7 +262,16 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-grid">
-      {/* Sidebar / Filters */}      <aside className="sidebar">
+      {/* Mobile Sidebar Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-sidebar-backdrop" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar / Filters */}
+      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/icon.svg" alt="Creator Match Logo" style={{ width: '20px', height: '20px', borderRadius: '4px' }} />
           <h1 style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.02em', color: 'var(--color-text-primary)' }}>
@@ -382,7 +392,23 @@ export default function Dashboard() {
 
 
       {/* Main Dashboard Panel */}
-      <main className="main-content">
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        {/* Mobile Header Bar */}
+        <div className="mobile-header">
+          <button onClick={() => setMobileMenuOpen(true)} className="mobile-menu-toggle" aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/icon.svg" alt="Logo" style={{ width: '18px', height: '18px' }} />
+            <span style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '0.05em' }}>CREATOR MATCH</span>
+          </div>
+        </div>
+
+        <main className="main-content">
         {/* Header section */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
@@ -441,26 +467,28 @@ export default function Dashboard() {
         {/* Creators Table Container */}
         <div className="glass" style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           {/* Table Header Filter bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid var(--card-border)', gap: '15px', alignItems: 'center' }}>
+          <div className="table-filter-bar">
             {/* Search Input */}
             <input
               type="text"
               aria-label="Search by name or handle"
               placeholder="Search by name or handle..."
-              className="input-field"
+              className="input-field search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ maxWidth: '300px' }}
             />
 
             {/* Right actions: Status Filters + Export CSV */}
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div className="table-filter-actions">
               {/* Status Filters */}
-              <div style={{ display: 'flex', gap: '5px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
+              <div className="status-filter-tabs">
                 {['All', 'uncontacted', 'draft_created', 'emailed', 'dm_copied'].map((filter) => (
                   <button
                     key={filter}
-                    onClick={() => setStatusFilter(filter)}
+                    onClick={() => {
+                      setStatusFilter(filter);
+                      setMobileMenuOpen(false);
+                    }}
                     className="btn"
                     style={{
                       padding: '6px 12px',
@@ -479,8 +507,7 @@ export default function Dashboard() {
               {/* Export CSV */}
               <button
                 onClick={handleExportCSV}
-                className="btn btn-secondary"
-                style={{ padding: '8px 16px', fontSize: '12px' }}
+                className="btn btn-secondary export-btn"
                 disabled={creators.length === 0}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ verticalAlign: 'middle' }}>
@@ -605,6 +632,7 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+      </div>
 
       {/* Creator Profile Drawer */}
       {selectedCreator && (

@@ -434,31 +434,140 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 
+/* --- Responsive Filter Bar Styles --- */
+.table-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--card-border);
+  gap: 15px;
+  align-items: center;
+}
+
+.search-input {
+  max-width: 300px;
+}
+
+.table-filter-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.status-filter-tabs {
+  display: flex;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+}
+
+.export-btn {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+/* --- Mobile Header & Backdrop elements --- */
+.mobile-header {
+  display: none;
+  background: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border-default);
+  padding: 12px 16px;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  flex-shrink: 0;
+}
+
+.mobile-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 199;
+}
+
+.mobile-menu-toggle {
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  opacity: 0.8;
+}
+
 /* --- Mobile Responsive Breakpoints --- */
 @media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+
   .dashboard-grid {
     grid-template-columns: 1fr;
-    height: auto;
-    overflow-y: visible;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--card-border);
-    padding: 20px;
-    gap: 20px;
-    height: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: #0d0d12;
+    border-right: 1px solid var(--color-border-default);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.7);
+    height: 100vh;
   }
 
-  .main-content, main {
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    flex: 1;
     padding: 16px !important;
-    height: auto !important;
-    overflow-y: visible !important;
+    height: calc(100vh - 49px) !important; /* Subtract header height */
+    overflow-y: auto !important;
   }
 
   .table-scroll-container {
     max-height: none;
+    overflow-x: auto;
     overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Stack header elements vertically */
+  main > header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  main > header > div {
+    width: 100%;
+  }
+
+  main > header button {
+    width: 100%;
+    justify-content: center;
   }
 
   /* Adjust stats grid to 2 columns on mobile */
@@ -467,13 +576,41 @@ body {
     gap: 12px !important;
   }
 
-  /* Make creators table horizontally scrollable to prevent overflow */
-  .creator-table {
-    display: block;
+  /* Table filter bar wrapping */
+  .table-filter-bar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .search-input {
+    max-width: none;
     width: 100%;
+  }
+
+  .table-filter-actions {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  /* Make status tabs scrollable on small screens */
+  .status-filter-tabs {
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
+    width: 100%;
+    padding: 4px;
+  }
+
+  .status-filter-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for tabs */
+  }
+
+  .export-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   /* Make modal & drawer scale to full width on mobile */
@@ -492,6 +629,7 @@ body {
 }
 
 @media (max-width: 480px) {
+  /* Stack stats to 1 column on extremely small devices */
   main > div[style*="gridTemplateColumns"] {
     grid-template-columns: 1fr !important;
     gap: 10px !important;
