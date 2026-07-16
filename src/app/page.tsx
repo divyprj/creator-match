@@ -259,8 +259,8 @@ export default function Dashboard() {
   return (
     <div className="dashboard-grid">
       {/* Sidebar / Filters */}      <aside className="sidebar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--color-accent-primary)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/icon.svg" alt="Creator Match Logo" style={{ width: '20px', height: '20px', borderRadius: '4px' }} />
           <h1 style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.02em', color: 'var(--color-text-primary)' }}>
             CREATOR MATCH
           </h1>
