@@ -357,7 +357,7 @@ export default function Dashboard() {
               setShowSegment(false);
             }}
             className="input-field"
-            style={{ background: 'rgba(0,0,0,0.5)', cursor: 'pointer' }}
+            style={{ background: 'rgba(15, 15, 30, 0.8)', cursor: 'pointer', borderRadius: '10px' }}
           >
             <option value="All">All Niches</option>
             <option value="Fashion">Fashion</option>
