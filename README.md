@@ -63,6 +63,39 @@ Live Deployment: https://creator-match-6t97.vercel.app
 
 ---
 
+## System Architecture
+
+The following block diagram illustrates the flow of requests and data integration across the application:
+
+```mermaid
+graph TD
+    Client[Browser Client: Next.js + React]
+    Sub[Supabase PostgreSQL Database]
+    API[Next.js Serverless API Routes]
+    Gemini[Google Gemini API]
+    Mail[Email Delivery: Resend REST / SMTP]
+    LocalStorage[(Browser Local Storage)]
+
+    Client -->|1. Filter / Export / Discover| API
+    API -->|Query / Sync Data| Sub
+    Client -->|2. Trigger Outreach Generation| API
+    API -->|3. Call model for copy| Gemini
+    Client -->|4. Trigger Send Email| API
+    API -->|5. Deliver Email| Mail
+    Client <-->|Save/Load Credentials| LocalStorage
+```
+
+### Components Description
+
+* **Client Layer (Next.js/React):** Single-page dashboard built with React 19 Client Components. Manages state for search, followers range, locations, and modal popups. Reads/writes SMTP configuration and the Gemini API key locally to `localStorage` for privacy and persistence.
+* **Serverless Backend (Next.js Route Handlers):** Processes discovery queries, calls the data sourcing adapters, invokes the Google Generative AI SDK, and establishes connections to the selected mail transport (Resend or SMTP).
+* **Database Layer (Supabase):** Renders raw PostgreSQL tables with pre-defined schemas and Row-Level Security (RLS) enabled. Maintains records for influencer profiles, content snippets, and campaign logs.
+* **External API Integration:**
+  * **Gemini API:** Generates context-rich outreach emails and DM copy.
+  * **Resend & Nodemailer SMTP:** Powers the communication delivery subsystem.
+
+---
+
 ## Project Structure
 
 ```
@@ -145,6 +178,19 @@ ON public.influencers FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Enable all access for anon users on outreach_logs"
 ON public.outreach_logs FOR ALL USING (true) WITH CHECK (true);
 ```
+
+---
+
+## System Requirements
+
+Before setting up the project, make sure you have the following prerequisites installed and configured:
+
+* **Runtime:** Node.js `>= 18.17.0` (LTS version `20.x` or `22.x` is highly recommended).
+* **Package Manager:** `npm` (comes with Node) or `yarn`.
+* **Database:** An active [Supabase](https://supabase.com/) project with the SQL schema in `supabase/schema.sql` applied.
+* **API Credentials:**
+  * A valid **Google Gemini API Key** from [Google AI Studio](https://aistudio.google.com/) (starts with `AIzaSy`).
+  * A **Resend API Key** (starts with `re_`) or standard **SMTP credentials** (e.g. Gmail App Password) for email delivery.
 
 ---
 
