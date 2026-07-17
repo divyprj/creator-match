@@ -2,11 +2,6 @@
 
 [![YouTube](https://img.shields.io/badge/YOUTUBE-WATCH%20DEMO%20VIDEO-red?logo=youtube&labelColor=464646&style=for-the-badge)](https://youtu.be/4axsrArhS_E)
 
-![Node Version](https://img.shields.io/badge/node-%3E%3D%2018.17.0-blue)
-![Framework](https://img.shields.io/badge/framework-Next.js-red)
-![Backend](https://img.shields.io/badge/backend-Supabase%20%7C%20Gemini-orange)
-![License](https://img.shields.io/badge/license-MIT-green)
-
 Creator Match is a premium web dashboard designed for discovering, organizing, and executing outreach campaigns for social media influencers. Built with Next.js (App Router), Supabase, Google Gemini AI, and Resend, the application automates the entire creator-sourcing and message-personalization lifecycle.
 
 Live Deployment: https://creatormatch-app.vercel.app
