@@ -6,6 +6,22 @@ Live Deployment: https://creator-match-6t97.vercel.app
 
 ---
 
+## Release Assets & Quick Start Launcher
+
+You can download pre-packaged assets and launchers directly from the [GitHub v1.0.0 Release Page](https://github.com/divyprj/creator-match/releases/tag/v1.0.0):
+
+* **`launchers.zip`**: Contains the compiled launcher executables (`.exe`) styled with custom Creator Match icons. Download this to run the app from your local clone.
+* **`creator-match.zip`**: A clean, fully packaged version of the entire codebase (excluding development caches) including the source files and launchers.
+
+### How to use:
+1. **Download & Extract**: Download `creator-match.zip` and extract it to a folder.
+2. **Environment Setup**: Copy `.env.example` to `.env.local` and add your Supabase, Gemini, and SMTP credentials.
+3. **Run Install**: Open the `launchers` folder and double-click **`install.exe`** to install all project dependencies.
+4. **Start App**: Double-click **`run.exe`** inside the `launchers` folder. This will automatically start the Next.js server and launch the app in your browser at `http://localhost:3000`.
+5. **Close App**: Double-click **`stop.exe`** to close the server and browser.
+
+---
+
 ## Screenshots
 
 ### Main Dashboard
