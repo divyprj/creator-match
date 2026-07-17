@@ -147,18 +147,13 @@ creator-match/
       test_smtp.js        -- SMTP connectivity test
   supabase/
     schema.sql            -- Database schema and RLS policies
-  install.bat             -- Dependency installer
-  install.exe             -- Dependency installer launcher (styled with Creator Match icon)
-  run.bat                 -- Start dev server and open browser
-  run.exe                 -- Start dev server launcher (styled with Creator Match icon)
-  stop.bat                -- Stop dev server and close browser
-  stop.exe                -- Stop dev server launcher (styled with Creator Match icon)
-  uninstall.bat           -- Remove dependencies and build cache
-  uninstall.exe           -- Remove dependencies launcher (styled with Creator Match icon)
-  repair.bat              -- Revert to last working GitHub version
-  repair.exe              -- Revert launcher (styled with Creator Match icon)
-  create_shortcuts.bat    -- Create desktop shortcuts with Creator Match icon
-  create_shortcuts.exe    -- Create desktop shortcuts launcher (styled with Creator Match icon)
+  launchers/              -- Directory containing all launchers and batch scripts (styled with custom icons)
+    install.bat / .exe     -- Dependency installer
+    run.bat / .exe         -- Start dev server and open browser
+    stop.bat / .exe        -- Stop dev server and close browser
+    uninstall.bat / .exe   -- Remove dependencies and build cache
+    repair.bat / .exe      -- Revert to last working GitHub version
+    create_shortcuts.bat / .exe -- Create desktop shortcuts on Windows
 ```
 
 ---
@@ -246,18 +241,18 @@ SMTP_PASS=your-resend-api-key-starting-with-re_
 
 ---
 
-The project includes compiled executable launchers (`.exe`) that wrapper and execute their corresponding batch scripts. These executables are beautifully styled with the custom **Creator Match icon** so they display properly in Windows File Explorer:
+The project includes compiled executable launchers (`.exe`) and their corresponding batch scripts, located inside the **`launchers`** subdirectory. These executables are beautifully styled with the custom **Creator Match icon** so they display properly in Windows File Explorer:
 
 | Launcher (.exe) | Script (.bat) | Description |
 |---|---|---|
-| `install.exe` | `install.bat` | Installs all project dependencies and verifies environment configuration. |
-| `run.exe` | `run.bat` | Starts the development server and automatically opens the browser to localhost:3000. |
-| `stop.exe` | `stop.bat` | Stops the development server and closes the browser tab. |
-| `uninstall.exe` | `uninstall.bat` | Removes node_modules, .next build cache, and package-lock.json. |
-| `repair.exe` | `repair.bat` | Reverts all source code to the latest working version from GitHub, preserves .env.local, and reinstalls dependencies. |
-| `create_shortcuts.exe` | `create_shortcuts.bat` | Generates desktop shortcuts for all scripts, styled with the custom Creator Match icon. |
+| `launchers/install.exe` | `launchers/install.bat` | Installs all project dependencies and verifies environment configuration. |
+| `launchers/run.exe` | `launchers/run.bat` | Starts the development server and automatically opens the browser to localhost:3000. |
+| `launchers/stop.exe` | `launchers/stop.bat` | Stops the development server and closes the browser tab. |
+| `launchers/uninstall.exe` | `launchers/uninstall.bat` | Removes node_modules, .next build cache, and package-lock.json. |
+| `launchers/repair.exe` | `launchers/repair.bat` | Reverts all source code to the latest working version from GitHub, preserves .env.local, and reinstalls dependencies. |
+| `launchers/create_shortcuts.exe` | `launchers/create_shortcuts.bat` | Generates desktop shortcuts for all scripts, styled with the custom Creator Match icon. |
 
-You can double-click either the `.exe` or `.bat` files directly in File Explorer.
+You can double-click either the `.exe` or `.bat` files directly inside the `launchers` directory in File Explorer.
 
 ---
 

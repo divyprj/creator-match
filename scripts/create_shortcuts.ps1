@@ -3,17 +3,18 @@ $desktopPath = [System.IO.Path]::Combine([Environment]::GetFolderPath("Desktop")
 $iconPath = Join-Path $currentDir "public\icon.ico"
 
 $shortcuts = @(
-    @{ Name = "Install Creator Match"; Target = "install.bat" },
-    @{ Name = "Run Creator Match"; Target = "run.bat" },
-    @{ Name = "Stop Creator Match"; Target = "stop.bat" },
-    @{ Name = "Uninstall Creator Match"; Target = "uninstall.bat" },
-    @{ Name = "Repair Creator Match"; Target = "repair.bat" }
+    @{ Name = "Install Creator Match"; Target = "install.exe" },
+    @{ Name = "Run Creator Match"; Target = "run.exe" },
+    @{ Name = "Stop Creator Match"; Target = "stop.exe" },
+    @{ Name = "Uninstall Creator Match"; Target = "uninstall.exe" },
+    @{ Name = "Repair Creator Match"; Target = "repair.exe" },
+    @{ Name = "Create Shortcuts"; Target = "create_shortcuts.exe" }
 )
 
 $WshShell = New-Object -ComObject WScript.Shell
 foreach ($s in $shortcuts) {
     $shortcutPath = Join-Path $desktopPath "$($s.Name).lnk"
-    $targetPath = Join-Path $currentDir $s.Target
+    $targetPath = Join-Path $currentDir "launchers\$($s.Target)"
     
     $Shortcut = $WshShell.CreateShortcut($shortcutPath)
     $Shortcut.TargetPath = $targetPath

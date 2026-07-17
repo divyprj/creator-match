@@ -4,8 +4,10 @@ $source = "scripts\wrapper.cs"
 
 $launchers = @("run", "install", "stop", "uninstall", "repair", "create_shortcuts")
 
+New-Item -ItemType Directory -Force -Path "launchers"
+
 foreach ($l in $launchers) {
-    $out = "$l.exe"
+    $out = "launchers\$l.exe"
     & $csc "/out:$out" "/win32icon:$icon" $source
     Write-Host "Compiled launcher: $out with icon $icon"
 }
