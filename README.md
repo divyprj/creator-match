@@ -152,6 +152,7 @@ creator-match/
   stop.bat                -- Stop dev server and close browser
   uninstall.bat           -- Remove dependencies and build cache
   repair.bat              -- Revert to last working GitHub version
+  create_shortcuts.bat    -- Create desktop shortcuts with Creator Match icon
 ```
 
 ---
@@ -250,6 +251,7 @@ The project includes batch scripts for one-click setup and management:
 | `stop.bat` | Stops the development server and closes the browser tab. |
 | `uninstall.bat` | Removes node_modules, .next build cache, and package-lock.json. |
 | `repair.bat` | Reverts all source code to the latest working version from GitHub, preserves .env.local, and reinstalls dependencies. |
+| `create_shortcuts.bat` | Generates desktop shortcuts for all scripts, beautifully styled with the custom Creator Match icon. |
 
 ---
 
