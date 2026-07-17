@@ -2,7 +2,7 @@
 
 Creator Match is a premium web dashboard designed for discovering, organizing, and executing outreach campaigns for social media influencers. Built with Next.js (App Router), Supabase, Google Gemini AI, and Resend, the application automates the entire creator-sourcing and message-personalization lifecycle.
 
-Live Deployment: https://creator-match-6t97.vercel.app
+Live Deployment: https://creatormatch-app.vercel.app
 
 ---
 
@@ -346,7 +346,7 @@ The application is deployed on Vercel with the following environment variables c
 * SMTP_USER
 * SMTP_PASS
 
-Live URL: https://creator-match-6t97.vercel.app
+Live URL: https://creatormatch-app.vercel.app
 
 ---
 
