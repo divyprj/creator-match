@@ -1,5 +1,7 @@
 # Creator Match - Automated Micro-Influencer Discovery and Outreach Dashboard
 
+[![YouTube](https://img.shields.io/badge/YOUTUBE-WATCH%20DEMO%20VIDEO-red?logo=youtube&labelColor=464646&style=for-the-badge)](https://youtu.be/4axsrArhS_E)
+
 Creator Match is a premium web dashboard designed for discovering, organizing, and executing outreach campaigns for social media influencers. Built with Next.js (App Router), Supabase, Google Gemini AI, and Resend, the application automates the entire creator-sourcing and message-personalization lifecycle.
 
 Live Deployment: https://creatormatch-app.vercel.app
