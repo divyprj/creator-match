@@ -35,17 +35,12 @@ export interface OutreachLog {
   created_at: string;
 }
 
-export interface AppSettings {
-  smtp_host: string;
-  smtp_port: number;
-  smtp_user: string;
-  smtp_pass: string;
-  gemini_api_key: string;
-}
 
 export const VALID_NICHES = [
   'Fashion', 'Beauty', 'Fitness', 'Food', 'Tech',
   'Gaming', 'Finance', 'Education', 'Travel', 'Parenting',
+  'Lifestyle', 'Health & Wellness', 'Pets', 'Home & DIY',
+  'Entertainment', 'Music', 'Sports', 'Automotive',
 ] as const;
 
 export type Niche = (typeof VALID_NICHES)[number];

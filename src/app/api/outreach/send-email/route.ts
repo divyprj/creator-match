@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin, getAuthUserId } from '@/lib/supabaseServer';
 import nodemailer from 'nodemailer';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { creatorId, subject, body: emailBody, settings } = body;
+    const { creatorId, subject, body: emailBody } = body;
 
     if (!creatorId) {
       return NextResponse.json({ error: 'Creator ID is required' }, { status: 400 });
@@ -17,11 +17,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 });
     }
 
+    // Get authenticated user
+    const userId = await getAuthUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     // 1. Fetch creator details to get their email address
-    const { data: creator, error: creatorError } = await supabase
+    const { data: creator, error: creatorError } = await supabaseAdmin
       .from('influencers')
       .select('*')
       .eq('id', creatorId)
+      .eq('user_id', userId)
       .single();
 
     if (creatorError || !creator) {
@@ -38,20 +45,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Resolve SMTP credentials (request body or environment variables)
-    const host = settings?.smtp_host || process.env.SMTP_HOST;
-    const port = settings?.smtp_port || (process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465);
-    const user = settings?.smtp_user || process.env.SMTP_USER;
-    const pass = settings?.smtp_pass || process.env.SMTP_PASS;
+    // 2. Resolve SMTP credentials (server-side environment variables only)
+    const host = process.env.SMTP_HOST;
+    const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
 
-    if (!host || !user || !pass || host.includes('your-email') || host === '') {
+    if (!host || !user || !pass || host === '') {
       return NextResponse.json(
-        { error: 'SMTP settings are not configured. Please add them in App Settings or set environment variables.' },
+        { error: 'SMTP settings are not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in your .env.local file.' },
         { status: 400 }
       );
     }
 
-    // 3. Send email (resend API or nodemailer SMTP)
+    // 3. Send email (Resend API or Nodemailer SMTP)
     if (pass.startsWith('re_')) {
       const fromAddress = (user === 'resend' || !user.includes('@')) ? 'onboarding@resend.dev' : user;
       
@@ -79,9 +86,11 @@ export async function POST(request: NextRequest) {
           errorMessage.toLowerCase().includes('restrict') || 
           res.status === 403
         ) {
-          const ownerEmail = process.env.SMTP_USER && process.env.SMTP_USER.includes('@')
-            ? process.env.SMTP_USER
-            : 'surajdivyansh104@gmail.com';
+          // Use SMTP_USER as the owner email for sandbox redirect
+          const ownerEmail = user.includes('@') ? user : '';
+          if (!ownerEmail) {
+            throw new Error('Resend sandbox restriction: set SMTP_USER to your verified email in .env.local');
+          }
             
           console.log(`Onboarding restriction detected. Redirecting sandbox email from ${creator.email} to owner ${ownerEmail}`);
           
@@ -128,8 +137,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 5. Create outreach log in database
-    const { error: logError } = await supabase.from('outreach_logs').insert({
+    // 5. Create outreach log in database (service-role client bypasses RLS)
+    const { error: logError } = await supabaseAdmin.from('outreach_logs').insert({
       influencer_id: creatorId,
       type: 'email',
       subject,
@@ -141,8 +150,8 @@ export async function POST(request: NextRequest) {
       console.error('Error saving email log to database:', logError);
     }
 
-    // 6. Update influencer outreach status
-    const { error: statusError } = await supabase
+    // 6. Update influencer outreach status (service-role client bypasses RLS)
+    const { error: statusError } = await supabaseAdmin
       .from('influencers')
       .update({ outreach_status: 'emailed' })
       .eq('id', creatorId);

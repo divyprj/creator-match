@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin, getAuthUserId } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,9 +12,15 @@ function escapeCsvField(value: string): string {
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    const userId = await getAuthUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const { data, error } = await supabaseAdmin
       .from('influencers')
       .select('*')
+      .eq('user_id', userId)
       .order('followers_count', { ascending: false });
 
     if (error) {

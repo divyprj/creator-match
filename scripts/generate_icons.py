@@ -4,61 +4,71 @@ from PIL import Image, ImageDraw
 
 def create_icon(size=256):
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    cx, cy = size / 2, size / 2
-    r = size * 14 / 32
+    cx, cy = size / 2.0, size / 2.0
+    r_boundary = size / 2.0
     
-    c1 = (0, 149, 246)
-    c2 = (91, 81, 216)
+    c1 = (29, 143, 255)  # #1D8FFF
+    c2 = (10, 107, 255)  # #0A6BFF
     
+    # Fill circular area with gradient, rest is transparent
     for y in range(size):
         for x in range(size):
             dx = x - cx
             dy = y - cy
-            if dx*dx + dy*dy <= r*r:
-                min_p = (cx - r/math.sqrt(2)) + (cy - r/math.sqrt(2))
-                max_p = (cx + r/math.sqrt(2)) + (cy + r/math.sqrt(2))
-                p = x + y
-                t = (p - min_p) / (max_p - min_p)
+            if dx * dx + dy * dy <= r_boundary * r_boundary:
+                t = (x + y) / (2.0 * size)
                 t = max(0.0, min(1.0, t))
-                
                 red = int(c1[0] + (c2[0] - c1[0]) * t)
                 green = int(c1[1] + (c2[1] - c1[1]) * t)
                 blue = int(c1[2] + (c2[2] - c1[2]) * t)
                 img.putpixel((x, y), (red, green, blue, 255))
 
     draw = ImageDraw.Draw(img)
-    scale = size / 32.0
+    scale = size / 24.0
     
-    c_left_x = 13 * scale
-    c_left_y = 16 * scale
-    r_circle = 5 * scale
-    stroke_w = max(1, int(2 * scale))
+    # Draw face outline (circle cx=12, cy=12, r=10 on 24x24 grid)
+    face_cx = 12.0 * scale
+    face_cy = 12.0 * scale
+    face_r = 10.0 * scale
+    stroke_w = max(1, int(2.5 * scale))
     
     draw.ellipse(
-        [c_left_x - r_circle, c_left_y - r_circle, c_left_x + r_circle, c_left_y + r_circle],
-        outline=(255, 255, 255, 217),
+        [face_cx - face_r, face_cy - face_r, face_cx + face_r, face_cy + face_r],
+        outline=(255, 255, 255, 255),
         width=stroke_w
     )
     
-    c_right_x = 19 * scale
-    c_right_y = 16 * scale
+    # Draw eyes (dots at 9,9 and 15,9 on 24x24 grid)
+    eye_r = stroke_w / 2.0
+    
+    eye1_cx = 9.0 * scale
+    eye1_cy = 9.0 * scale
     draw.ellipse(
-        [c_right_x - r_circle, c_right_y - r_circle, c_right_x + r_circle, c_right_y + r_circle],
-        outline=(255, 255, 255, 217),
-        width=stroke_w
+        [eye1_cx - eye_r, eye1_cy - eye_r, eye1_cx + eye_r, eye1_cy + eye_r],
+        fill=(255, 255, 255, 255)
     )
     
-    sparkle_coords = [
-        (16 * scale, 11.5 * scale),
-        (16.8 * scale, 14.2 * scale),
-        (19.5 * scale, 15 * scale),
-        (16.8 * scale, 15.8 * scale),
-        (16 * scale, 18.5 * scale),
-        (15.2 * scale, 15.8 * scale),
-        (12.5 * scale, 15 * scale),
-        (15.2 * scale, 14.2 * scale)
-    ]
-    draw.polygon(sparkle_coords, fill=(255, 255, 255, 255))
+    eye2_cx = 15.0 * scale
+    eye2_cy = 9.0 * scale
+    draw.ellipse(
+        [eye2_cx - eye_r, eye2_cy - eye_r, eye2_cx + eye_r, eye2_cy + eye_r],
+        fill=(255, 255, 255, 255)
+    )
+    
+    # Draw smile mouth
+    # Bounding box is [8, 12, 16, 16] on 24x24 grid
+    m_x0 = 8.0 * scale
+    m_y0 = 12.0 * scale
+    m_x1 = 16.0 * scale
+    m_y1 = 16.0 * scale
+    
+    draw.arc(
+        [m_x0, m_y0, m_x1, m_y1],
+        start=0,
+        end=180,
+        fill=(255, 255, 255, 255),
+        width=stroke_w
+    )
     
     return img
 
@@ -70,11 +80,10 @@ if __name__ == "__main__":
     img256.save("public/icon.png")
     print("Saved public/icon.png")
     
-    # Generate smaller sizes for ICO inclusion
+    # Save as ICO with multiple sizes (including small sizes properly for Windows shell display)
     img16 = create_icon(16)
     img32 = create_icon(32)
     img48 = create_icon(48)
     
-    # Save as ICO with multiple sizes
-    img256.save("public/icon.ico", sizes=[(16, 16), (32, 32), (48, 48), (256, 256)])
+    img256.save("public/icon.ico", format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (256, 256)])
     print("Saved public/icon.ico")

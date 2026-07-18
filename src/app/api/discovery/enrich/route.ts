@@ -1,7 +1,87 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin, getAuthUserId } from '@/lib/supabaseServer';
+import { exec } from 'child_process';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+interface InstagramData {
+  profile_pic_url?: string;
+  biography?: string;
+  followers?: number;
+  following?: number;
+  external_url?: string;
+  media_count?: number;
+  error?: string;
+}
+
+interface OsintgramData {
+  user_id?: number;
+  full_name?: string;
+  biography?: string;
+  followers?: number;
+  following?: number;
+  media_count?: number;
+  is_private?: boolean;
+  is_verified?: boolean;
+  is_business?: boolean;
+  category?: string;
+  external_url?: string;
+  profile_pic_url?: string;
+  public_email?: string;
+  contact_phone_number?: string;
+  whatsapp_number?: string;
+  city_name?: string;
+  address_street?: string;
+  recent_posts?: Array<{
+    type: string;
+    likes: number;
+    comments: number;
+    views: number;
+    text: string;
+    url: string;
+  }>;
+  error?: string;
+}
+
+function runPythonScript<T>(scriptName: string, handle: string): Promise<T | null> {
+  const hasSessionId = !!process.env.INSTAGRAM_SESSIONID;
+  const hasCredentials = !!process.env.INSTAGRAM_USERNAME && !!process.env.INSTAGRAM_PASSWORD;
+
+  if (!hasSessionId && !hasCredentials) return Promise.resolve(null);
+
+  return new Promise((resolve) => {
+    const safeHandle = handle.replace(/[^a-zA-Z0-9._]/g, '');
+    const scriptPath = path.join(process.cwd(), 'scripts', scriptName);
+    const cmd = `python "${scriptPath}" ${safeHandle}`;
+
+    exec(cmd, { env: process.env, timeout: 15000 }, (error, stdout, stderr) => {
+      if (error) {
+        console.warn(`[${scriptName}] error for ${handle}:`, error.message);
+        return resolve(null);
+      }
+      try {
+        const data = JSON.parse(stdout.trim()) as T & { error?: string };
+        if (data.error) {
+          console.warn(`[${scriptName}] reported error for ${handle}:`, data.error);
+          return resolve(null);
+        }
+        return resolve(data);
+      } catch (parseErr) {
+        console.warn(`[${scriptName}] parse error for ${handle}:`, parseErr);
+        return resolve(null);
+      }
+    });
+  });
+}
+
+async function fetchFromOsintgram(handle: string): Promise<OsintgramData | null> {
+  return runPythonScript<OsintgramData>('osintgram_enrich.py', handle);
+}
+
+async function fetchFromInstaloader(handle: string): Promise<InstagramData | null> {
+  return runPythonScript<InstagramData>('instagram_enrich.py', handle);
+}
 
 function extractEmail(text: string): string | null {
   if (!text) return null;
@@ -110,6 +190,9 @@ export async function POST(request: NextRequest) {
     if (!niche) {
       return NextResponse.json({ error: 'Niche is required' }, { status: 400 });
     }
+
+    // Get authenticated user (optional — guests can still enrich but data won't persist)
+    const userId = await getAuthUserId();
 
     const results = {
       processed: 0,
@@ -369,28 +452,56 @@ export async function POST(request: NextRequest) {
           const cities = ['Mumbai, Maharashtra, India', 'Delhi, India', 'Bangalore, Karnataka, India', 'Pune, Maharashtra, India', 'Lucknow, Uttar Pradesh, India'];
           location = cities[Math.floor(Math.random() * cities.length)];
           
-          // Generate a beautiful avatar image using Unsplash keyword
-          const avatarIds = [
-            '1534528741775-53994a69daeb',
-            '1507003211169-0a1dd7228f2d',
-            '1494790108377-be9c29b29330',
-            '1500648767791-00dcc994a43e',
-            '1544005313-94ddf0286df2',
-            '1506794778202-cad84cf45f1d',
-            '1522075469751-3a6694fb2f61',
-            '1539571696357-5a69c17a67c6'
-          ];
-          const randomAvatarId = avatarIds[Math.floor(Math.random() * avatarIds.length)];
-          profileImage = `https://images.unsplash.com/photo-${randomAvatarId}?auto=format&fit=crop&w=150&h=150&q=80`;
+          // Generate a deterministic avatar from the creator's name (no random stock photos)
+          const avatarName = encodeURIComponent(name || handle);
+          profileImage = `https://ui-avatars.com/api/?name=${avatarName}&size=150&background=0D1117&color=0095F6&bold=true&format=png`;
 
-          email = `${handle.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()}@gmail.com`;
+          email = null; // No email available for fallback profiles
           recentPosts = getMockPosts(niche, handle);
         }
 
-        // If still no email found, construct a fallback email so they are not skipped
+        // Enrich via Instagram APIs: try Osintgram (richer data) first, fall back to instaloader
+        const osintData = await fetchFromOsintgram(handle);
+        if (osintData) {
+          console.log(`[Osintgram] Enriched ${handle} — email: ${osintData.public_email || 'none'}, city: ${osintData.city_name || 'none'}, verified: ${osintData.is_verified}`);
+          if (osintData.profile_pic_url) profileImage = osintData.profile_pic_url;
+          if (osintData.followers) followers = osintData.followers;
+          if (osintData.full_name) name = osintData.full_name;
+          if (osintData.biography) {
+            bio = osintData.biography;
+            if (!email) email = extractEmail(osintData.biography);
+          }
+          if (osintData.public_email) email = osintData.public_email;
+          if (osintData.city_name) location = osintData.city_name;
+          if (osintData.external_url && !email) email = extractEmail(osintData.external_url);
+          if (osintData.recent_posts && osintData.recent_posts.length > 0) {
+            recentPosts = osintData.recent_posts.map((p) => ({
+              text: p.text || '',
+              url: p.url || '',
+              likes: String(p.likes || 0),
+              comments: String(p.comments || 0),
+              views: String(p.views || 0),
+              type: p.type || 'Post',
+            }));
+          }
+        } else {
+          const igApiData = await fetchFromInstaloader(handle);
+          if (igApiData) {
+            console.log(`[Instaloader] Enriched ${handle} profile details (fallback)`);
+            if (igApiData.profile_pic_url) profileImage = igApiData.profile_pic_url;
+            if (igApiData.followers) followers = igApiData.followers;
+            if (igApiData.biography) {
+              bio = igApiData.biography;
+              if (!email) email = extractEmail(igApiData.biography);
+            }
+            if (igApiData.external_url && !email) email = extractEmail(igApiData.external_url);
+          }
+        }
+
+        // If no email was found from scraping, leave it as null
+        // Do NOT fabricate fake emails — it causes outreach to nonexistent addresses
         if (!email) {
-          const cleanHandle = handle.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase();
-          email = `${cleanHandle}@gmail.com`;
+          email = null;
         }
 
         // Follower Count Filter (5,000 to 10,000,000 followers)
@@ -406,32 +517,38 @@ export async function POST(request: NextRequest) {
         }
 
         // Upsert to Supabase
-        const { error: upsertError } = await supabase.from('influencers').upsert(
-          {
-            handle,
-            name,
-            email,
-            followers_count: followers,
-            engagement_rate: engagementRate,
-            engagement_rate_str: engRateStr || (engagementRate ? `${engagementRate}%` : null),
-            location,
-            niche,
-            bio,
-            profile_image: profileImage,
-            recent_posts: recentPosts,
-            outreach_status: 'uncontacted',
-          },
-          { onConflict: 'handle' }
-        );
+        // Save to database only for authenticated users
+        if (userId) {
+          // NOTE: outreach_status is intentionally excluded from the upsert payload.
+          // New records get 'uncontacted' via the database column default.
+          // Existing records keep their current status (emailed, dm_copied, etc.).
+          const { error: upsertError } = await supabaseAdmin.from('influencers').upsert(
+            {
+              handle,
+              name,
+              email,
+              followers_count: followers,
+              engagement_rate: engagementRate,
+              engagement_rate_str: engRateStr || (engagementRate ? `${engagementRate}%` : null),
+              location,
+              niche,
+              bio,
+              profile_image: profileImage,
+              recent_posts: recentPosts,
+              user_id: userId,
+            },
+            { onConflict: 'handle,user_id' }
+          );
 
-        if (upsertError) {
-          results.errors++;
-          results.details.push({
-            url,
-            status: 'error',
-            message: `Database upsert failed: ${upsertError.message}`,
-          });
-          continue;
+          if (upsertError) {
+            results.errors++;
+            results.details.push({
+              url,
+              status: 'error',
+              message: `Database upsert failed: ${upsertError.message}`,
+            });
+            continue;
+          }
         }
 
         results.saved++;
@@ -443,6 +560,13 @@ export async function POST(request: NextRequest) {
           email,
           followers,
           engagement_rate: engRateStr || (engagementRate ? `${engagementRate}%` : 'N/A'),
+          // Include full profile data so guests can display it without DB
+          profile_image: profileImage,
+          location,
+          niche,
+          bio,
+          recent_posts: recentPosts,
+          isGuest: !userId,
         });
 
       } catch (err: any) {

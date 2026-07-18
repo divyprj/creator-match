@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { VALID_NICHES } from '@/types';
 
 interface DiscoveryPanelProps {
-  onDiscoveryComplete: () => void;
+  onDiscoveryComplete: (enrichResult?: any) => void;
 }
 
 export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelProps) {
-  const [selectedOption, setSelectedOption] = useState('Fashion');
   const [customNiche, setCustomNiche] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
@@ -18,8 +16,8 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
   const handleDiscover = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalNiche = selectedOption === 'Other' ? customNiche : selectedOption;
-    if (!finalNiche.trim()) return;
+    const finalNiche = customNiche.trim();
+    if (!finalNiche) return;
 
     setLoading(true);
     setNewlySaved([]);
@@ -51,6 +49,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
       let totalSkipped = 0;
       let totalErrors = 0;
       const savedHandles: string[] = [];
+      const allDetails: any[] = [];
 
       for (let i = 0; i < totalUrls; i += batchSize) {
         const batch = urls.slice(i, i + batchSize);
@@ -77,6 +76,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
         if (enrichData.details) {
           enrichData.details.forEach((det: any) => {
+            allDetails.push(det);
             if (det.status === 'saved' && det.handle) {
               savedHandles.push(`@${det.handle}`);
             }
@@ -88,7 +88,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
       }
 
       setSummary({ saved: totalSaved, skipped: totalSkipped, errors: totalErrors });
-      onDiscoveryComplete();
+      onDiscoveryComplete({ saved: totalSaved, skipped: totalSkipped, errors: totalErrors, details: allDetails });
     } catch (err: any) {
       setStatusText(`Error: ${err.message}`);
     } finally {
@@ -147,7 +147,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 1 }}>
         <div>
-          <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>Influencer Discovery Engine</h3>
+          <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>Creator Discovery Engine</h3>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
             Source and enrich public creator profiles across Qoruz, StarNgage, and Collabstr.
           </p>
@@ -158,33 +158,19 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
       {!loading && !summary && (
         <form onSubmit={handleDiscover} style={{ display: 'flex', flexDirection: 'column', gap: '12px', zIndex: 1, width: '100%' }}>
           <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
-            <select
-              value={selectedOption}
-              onChange={(e) => setSelectedOption(e.target.value)}
-              className="input-field"
-              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', cursor: 'pointer' }}
-              required
-            >
-              {VALID_NICHES.map(n => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-              <option value="Other">Other / Custom</option>
-            </select>
-            <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', fontWeight: '500', flexShrink: 0 }}>
-              Scrape
-            </button>
-          </div>
-          {selectedOption === 'Other' && (
             <input
               type="text"
               value={customNiche}
               onChange={(e) => setCustomNiche(e.target.value)}
-              placeholder="Enter custom niche (e.g. Pets, Lifestyle, DIY)"
+              placeholder="Enter any niche (e.g. Fashion, Beauty, Gaming, Fitness...)"
               className="input-field"
-              style={{ width: '100%' }}
+              style={{ flex: 1 }}
               required
             />
-          )}
+            <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', fontWeight: '500', flexShrink: 0 }}>
+              Discover
+            </button>
+          </div>
         </form>
       )}
 
@@ -199,7 +185,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '8px', height: '8px', backgroundColor: 'var(--color-accent-primary)', borderRadius: '50%', boxShadow: '0 0 12px var(--color-accent-primary)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-            <div style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)', animation: 'status-pulse 1.5s infinite ease-in-out' }}>
+            <div role="status" aria-live="polite" aria-atomic="true" style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)', animation: 'status-pulse 1.5s infinite ease-in-out' }}>
               {statusText}
             </div>
             {progress.total > 0 && (
