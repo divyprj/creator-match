@@ -33,7 +33,7 @@ export async function GET() {
       'Content Themes', 'Profile Link', 'Outreach Status',
     ];
 
-    const rows = (data || []).map((c) => {
+    const rows = (data || []).map((c: any) => {
       const contentThemes = (c.recent_posts || [])
         .map((p: any) => (p.text || '').substring(0, 80))
         .filter(Boolean)
@@ -55,7 +55,7 @@ export async function GET() {
       ].map(escapeCsvField);
     });
 
-    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
 
     return new NextResponse(csvContent, {
       headers: {

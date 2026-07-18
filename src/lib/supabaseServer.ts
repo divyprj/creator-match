@@ -2,26 +2,37 @@ import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+
 /**
  * Server-side Supabase ADMIN client using the service_role key.
  * Bypasses Row Level Security — use ONLY in server-side API routes for writes.
+ * 
+ * Uses a Proxy to lazily instantiate the Supabase client when a method is accessed.
+ * This prevents build-time crashes on Vercel when env vars are missing.
  */
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+let cachedAdminClient: any = null;
 
-if (!serviceRoleKey) {
-  console.warn(
-    'SUPABASE_SERVICE_ROLE_KEY is not set. Server-side write operations will fail. ' +
-    'Add it to your .env.local from your Supabase dashboard (Settings → API → service_role key).'
-  );
-}
-
-export const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+export const supabaseAdmin = new Proxy({} as any, {
+  get(target, prop) {
+    if (!cachedAdminClient) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+      
+      const url = supabaseUrl || 'https://placeholder.supabase.co';
+      const key = serviceRoleKey || 'placeholder-service-role-key-value-to-prevent-throw';
+      
+      cachedAdminClient = createClient(url, key, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      });
+    }
+    const val = cachedAdminClient[prop];
+    return typeof val === 'function' ? val.bind(cachedAdminClient) : val;
+  }
+}) as any;
 
 /**
  * Create a server-side Supabase client that reads the user's auth session
