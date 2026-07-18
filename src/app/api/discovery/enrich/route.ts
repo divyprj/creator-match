@@ -1,87 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, getAuthUserId } from '@/lib/supabaseServer';
-import { exec } from 'child_process';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
-
-interface InstagramData {
-  profile_pic_url?: string;
-  biography?: string;
-  followers?: number;
-  following?: number;
-  external_url?: string;
-  media_count?: number;
-  error?: string;
-}
-
-interface OsintgramData {
-  user_id?: number;
-  full_name?: string;
-  biography?: string;
-  followers?: number;
-  following?: number;
-  media_count?: number;
-  is_private?: boolean;
-  is_verified?: boolean;
-  is_business?: boolean;
-  category?: string;
-  external_url?: string;
-  profile_pic_url?: string;
-  public_email?: string;
-  contact_phone_number?: string;
-  whatsapp_number?: string;
-  city_name?: string;
-  address_street?: string;
-  recent_posts?: Array<{
-    type: string;
-    likes: number;
-    comments: number;
-    views: number;
-    text: string;
-    url: string;
-  }>;
-  error?: string;
-}
-
-function runPythonScript<T>(scriptName: string, handle: string): Promise<T | null> {
-  const hasSessionId = !!process.env.INSTAGRAM_SESSIONID;
-  const hasCredentials = !!process.env.INSTAGRAM_USERNAME && !!process.env.INSTAGRAM_PASSWORD;
-
-  if (!hasSessionId && !hasCredentials) return Promise.resolve(null);
-
-  return new Promise((resolve) => {
-    const safeHandle = handle.replace(/[^a-zA-Z0-9._]/g, '');
-    const scriptPath = path.join(process.cwd(), 'scripts', scriptName);
-    const cmd = `python "${scriptPath}" ${safeHandle}`;
-
-    exec(cmd, { env: process.env, timeout: 15000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.warn(`[${scriptName}] error for ${handle}:`, error.message);
-        return resolve(null);
-      }
-      try {
-        const data = JSON.parse(stdout.trim()) as T & { error?: string };
-        if (data.error) {
-          console.warn(`[${scriptName}] reported error for ${handle}:`, data.error);
-          return resolve(null);
-        }
-        return resolve(data);
-      } catch (parseErr) {
-        console.warn(`[${scriptName}] parse error for ${handle}:`, parseErr);
-        return resolve(null);
-      }
-    });
-  });
-}
-
-async function fetchFromOsintgram(handle: string): Promise<OsintgramData | null> {
-  return runPythonScript<OsintgramData>('osintgram_enrich.py', handle);
-}
-
-async function fetchFromInstaloader(handle: string): Promise<InstagramData | null> {
-  return runPythonScript<InstagramData>('instagram_enrich.py', handle);
-}
 
 function extractEmail(text: string): string | null {
   if (!text) return null;
@@ -460,43 +380,7 @@ export async function POST(request: NextRequest) {
           recentPosts = getMockPosts(niche, handle);
         }
 
-        // Enrich via Instagram APIs: try Osintgram (richer data) first, fall back to instaloader
-        const osintData = await fetchFromOsintgram(handle);
-        if (osintData) {
-          console.log(`[Osintgram] Enriched ${handle} — email: ${osintData.public_email || 'none'}, city: ${osintData.city_name || 'none'}, verified: ${osintData.is_verified}`);
-          if (osintData.profile_pic_url) profileImage = osintData.profile_pic_url;
-          if (osintData.followers) followers = osintData.followers;
-          if (osintData.full_name) name = osintData.full_name;
-          if (osintData.biography) {
-            bio = osintData.biography;
-            if (!email) email = extractEmail(osintData.biography);
-          }
-          if (osintData.public_email) email = osintData.public_email;
-          if (osintData.city_name) location = osintData.city_name;
-          if (osintData.external_url && !email) email = extractEmail(osintData.external_url);
-          if (osintData.recent_posts && osintData.recent_posts.length > 0) {
-            recentPosts = osintData.recent_posts.map((p) => ({
-              text: p.text || '',
-              url: p.url || '',
-              likes: String(p.likes || 0),
-              comments: String(p.comments || 0),
-              views: String(p.views || 0),
-              type: p.type || 'Post',
-            }));
-          }
-        } else {
-          const igApiData = await fetchFromInstaloader(handle);
-          if (igApiData) {
-            console.log(`[Instaloader] Enriched ${handle} profile details (fallback)`);
-            if (igApiData.profile_pic_url) profileImage = igApiData.profile_pic_url;
-            if (igApiData.followers) followers = igApiData.followers;
-            if (igApiData.biography) {
-              bio = igApiData.biography;
-              if (!email) email = extractEmail(igApiData.biography);
-            }
-            if (igApiData.external_url && !email) email = extractEmail(igApiData.external_url);
-          }
-        }
+        // Instagram Private API scrapers were removed to comply with user security rules
 
         // If no email was found from scraping, leave it as null
         // Do NOT fabricate fake emails — it causes outreach to nonexistent addresses
