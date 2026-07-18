@@ -6,7 +6,7 @@ import DiscoveryPanel from './components/DiscoveryPanel';
 import CreatorDrawer from './components/CreatorDrawer';
 import OutreachModal from './components/OutreachModal';
 
-import { Creator, AppSettings } from '@/types';
+import { Creator, AppSettings, VALID_NICHES } from '@/types';
 
 interface Stats {
   total: number;
@@ -360,16 +360,9 @@ export default function Dashboard() {
             style={{ backgroundColor: 'rgba(0,0,0,0.5)', cursor: 'pointer' }}
           >
             <option value="All">All Niches</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Beauty">Beauty</option>
-            <option value="Fitness">Fitness</option>
-            <option value="Food">Food</option>
-            <option value="Tech">Tech</option>
-            <option value="Gaming">Gaming</option>
-            <option value="Finance">Finance</option>
-            <option value="Education">Education</option>
-            <option value="Travel">Travel</option>
-            <option value="Parenting">Parenting</option>
+            {VALID_NICHES.map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
           </select>
         </div>
 

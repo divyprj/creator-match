@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const WHITELISTED_NICHES = ['fashion', 'beauty', 'fitness', 'food', 'tech', 'gaming', 'finance', 'education'];
-
 function extractUrls(html: string): string[] {
   const urls: string[] = [];
   const regex = /href="([^"]+)"/g;
@@ -342,16 +340,6 @@ export async function GET(request: NextRequest) {
   }
 
   const niche = rawNiche.toLowerCase().trim();
-
-  // Validate niche against whitelist
-  if (!WHITELISTED_NICHES.includes(niche)) {
-    return NextResponse.json(
-      {
-        error: `Invalid niche: "${rawNiche}". Supported niches are: ${WHITELISTED_NICHES.join(', ')}`,
-      },
-      { status: 400 }
-    );
-  }
 
   // DuckDuckGo search query targeting Qoruz and StarNgage profiles
   const query = `(site:qoruz.com OR site:starngage.com/app/global/influencer/instagram OR site:collabstr.com) "${niche}" "gmail.com"`;

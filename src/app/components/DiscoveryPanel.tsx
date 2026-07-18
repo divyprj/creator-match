@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import { VALID_NICHES } from '@/types';
 
 interface DiscoveryPanelProps {
   onDiscoveryComplete: () => void;
 }
 
 export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelProps) {
-  const [niche, setNiche] = useState('Fashion');
+  const [selectedOption, setSelectedOption] = useState('Fashion');
+  const [customNiche, setCustomNiche] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [progress, setProgress] = useState({ total: 0, current: 0 });
@@ -16,7 +18,8 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
   const handleDiscover = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!niche.trim()) return;
+    const finalNiche = selectedOption === 'Other' ? customNiche : selectedOption;
+    if (!finalNiche.trim()) return;
 
     setLoading(true);
     setNewlySaved([]);
@@ -25,7 +28,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
     setStatusText('Searching DuckDuckGo...');
 
     try {
-      const searchRes = await fetch(`/api/discovery/search?niche=${encodeURIComponent(niche)}`);
+      const searchRes = await fetch(`/api/discovery/search?niche=${encodeURIComponent(finalNiche)}`);
       if (!searchRes.ok) throw new Error(`Search API failed with status ${searchRes.status}`);
 
       const searchData = await searchRes.json();
@@ -58,7 +61,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
         const enrichRes = await fetch('/api/discovery/enrich', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ urls: batch, niche }),
+          body: JSON.stringify({ urls: batch, niche: finalNiche }),
         });
 
         if (!enrichRes.ok) {
@@ -153,19 +156,35 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
       {/* Idle: show search form */}
       {!loading && !summary && (
-        <form onSubmit={handleDiscover} style={{ display: 'flex', gap: '12px', zIndex: 1 }}>
-          <input
-            type="text"
-            value={niche}
-            onChange={(e) => setNiche(e.target.value)}
-            placeholder="Niche (e.g. Fashion, Tech, Beauty, Gaming)"
-            className="input-field"
-            style={{ flex: 1 }}
-            required
-          />
-          <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', fontWeight: '500' }}>
-            Scrape
-          </button>
+        <form onSubmit={handleDiscover} style={{ display: 'flex', flexDirection: 'column', gap: '12px', zIndex: 1, width: '100%' }}>
+          <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+            <select
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+              className="input-field"
+              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', cursor: 'pointer' }}
+              required
+            >
+              {VALID_NICHES.map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+              <option value="Other">Other / Custom</option>
+            </select>
+            <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', fontWeight: '500', flexShrink: 0 }}>
+              Scrape
+            </button>
+          </div>
+          {selectedOption === 'Other' && (
+            <input
+              type="text"
+              value={customNiche}
+              onChange={(e) => setCustomNiche(e.target.value)}
+              placeholder="Enter custom niche (e.g. Pets, Lifestyle, DIY)"
+              className="input-field"
+              style={{ width: '100%' }}
+              required
+            />
+          )}
         </form>
       )}
 

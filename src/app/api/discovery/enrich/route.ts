@@ -82,11 +82,18 @@ function getMockPosts(niche: string, handle: string): any[] {
       { text: `Avoid these 3 credit card mistakes that are costing you thousands.`, likes: '2.9k', comments: '180', views: '80k', url: 'https://instagram.com/' + handle, type: 'Post' },
       { text: `Understanding inflation and how it affects your savings.`, likes: '1.8k', comments: '95', views: '45k', url: 'https://instagram.com/' + handle, type: 'Post' }
     ];
-  } else {
+  } else if (nicheLower.includes('education')) {
     return [
       { text: `How to study smart: 3 science-backed techniques to learn faster.`, likes: '1.4k', comments: '50', views: '30k', url: 'https://instagram.com/' + handle, type: 'Post' },
       { text: `Explaining the mystery of black holes in under 60 seconds!`, likes: '2.1k', comments: '95', views: '50k', url: 'https://instagram.com/' + handle, type: 'Reel' },
       { text: `A quick guide to the history of coding languages.`, likes: '1.1k', comments: '42', views: '25k', url: 'https://instagram.com/' + handle, type: 'Post' }
+    ];
+  } else {
+    const capNiche = niche.charAt(0).toUpperCase() + niche.slice(1).toLowerCase();
+    return [
+      { text: `Spent the day working on some new ${capNiche} content. Can't wait to share the final results with you all!`, likes: '1.2k', comments: '45', views: '15k', url: 'https://instagram.com/' + handle, type: 'Post' },
+      { text: `My daily routine and top tips for getting the most out of ${capNiche}. Full details are linked in my bio!`, likes: '950', comments: '38', views: '12k', url: 'https://instagram.com/' + handle, type: 'Post' },
+      { text: `A quick hack for anyone interested in ${capNiche}. Which part surprised you the most?`, likes: '2.1k', comments: '89', views: '45k', url: 'https://instagram.com/' + handle, type: 'Reel' }
     ];
   }
 }
