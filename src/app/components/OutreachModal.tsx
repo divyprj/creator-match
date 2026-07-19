@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
-import { Creator } from '@/types';
+import { Creator, AppSettings } from '@/types';
 
 
 interface OutreachModalProps {
@@ -30,29 +31,9 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
   const [copiedDm, setCopiedDm] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const modalRef = useRef<HTMLDivElement>(null);
 
   // Gemini auto-fire prevention state
   const [copyGenerated, setCopyGenerated] = useState(false);
-
-  useEffect(() => {
-    if (!creator) return;
-    const el = modalRef.current;
-    if (!el) return;
-    const focusable = el.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    first?.focus();
-
-    const trap = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
-      if (e.key !== 'Tab') return;
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-    };
-    el.addEventListener('keydown', trap);
-    return () => el.removeEventListener('keydown', trap);
-  }, [creator, onClose]);
 
   useEffect(() => {
     // If the copy has already been generated once, auto-update it when collabType changes
@@ -71,6 +52,19 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
     setDmBody('');
 
     try {
+      // Load local credentials/SMTP settings from localStorage
+      let localSettings = null;
+      if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('creator_match_settings');
+        if (local) {
+          try {
+            localSettings = JSON.parse(local);
+          } catch (e) {
+            console.warn('Failed to parse localStorage settings', e);
+          }
+        }
+      }
+
       const response = await fetch('/api/outreach/generate', {
         method: 'POST',
         headers: {
@@ -79,6 +73,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
         body: JSON.stringify({
           creatorId: creator.id,
           collabType,
+          settings: localSettings,
         }),
       });
 
@@ -97,12 +92,14 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
       setDmBody(data.dmBody || '');
       setCopyGenerated(true);
 
-      // Update outreach status to draft_created if currently uncontacted
-      await fetch('/api/creators/status', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creatorId: creator.id, status: 'draft_created', onlyIf: 'uncontacted' }),
-      });
+      // Update outreach status to draft_created if status is uncontacted
+      const { error: updateError } = await supabase
+        .from('influencers')
+        .update({ outreach_status: 'draft_created' })
+        .eq('id', creator.id)
+        .eq('outreach_status', 'uncontacted');
+
+      if (updateError) console.warn('Status update failed:', updateError);
       onStatusUpdate();
 
     } catch (err: any) {
@@ -119,6 +116,19 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
     setSuccessMsg('');
 
     try {
+      // Load local credentials/SMTP settings from localStorage
+      let localSettings = null;
+      if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('creator_match_settings');
+        if (local) {
+          try {
+            localSettings = JSON.parse(local);
+          } catch (e) {
+            console.warn('Failed to parse localStorage settings', e);
+          }
+        }
+      }
+
       const response = await fetch('/api/outreach/send-email', {
         method: 'POST',
         headers: {
@@ -128,6 +138,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
           creatorId: creator.id,
           subject: emailSubject,
           body: emailBody,
+          settings: localSettings,
         }),
       });
 
@@ -145,7 +156,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
       onStatusUpdate();
 
     } catch (err: any) {
-      setErrorMsg(err.message || 'Email delivery failed. Please check email provider settings.');
+      setErrorMsg(err.message || 'SMTP delivery failed. Please check app settings.');
     } finally {
       setSendingEmail(false);
     }
@@ -158,31 +169,23 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
       setCopiedDm(true);
       setTimeout(() => setCopiedDm(false), 2000);
 
-      // Log DM copy via server-side API
-      await fetch('/api/outreach/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          influencer_id: creator.id,
-          type: 'dm',
-          content: dmBody,
-          status: 'sent',
-        }),
+      // Create outreach log in database
+      const { error: logError } = await supabase.from('outreach_logs').insert({
+        influencer_id: creator.id,
+        type: 'dm',
+        content: dmBody,
+        status: 'sent',
       });
 
-      // Update influencer status to dm_copied via server-side API
-      // Only update if status is NOT already 'emailed' (higher priority)
-      await fetch('/api/creators/status', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creatorId: creator.id, status: 'dm_copied', onlyIf: 'draft_created' }),
-      });
-      // Also upgrade from 'uncontacted' to 'dm_copied'
-      await fetch('/api/creators/status', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creatorId: creator.id, status: 'dm_copied', onlyIf: 'uncontacted' }),
-      });
+      if (logError) console.warn('Error logging DM:', logError);
+
+      // Update influencer status to dm_copied
+      const { error: updateError } = await supabase
+        .from('influencers')
+        .update({ outreach_status: 'dm_copied' })
+        .eq('id', creator.id);
+
+      if (updateError) console.warn('Error updating status:', updateError);
       
       setSuccessMsg('DM copied to clipboard and status updated!');
       onStatusUpdate();
@@ -196,7 +199,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Outreach Editor" onClick={(e) => e.stopPropagation()}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)', paddingBottom: '12px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '600' }}>Personalized Outreach for {creator.name}</h2>
@@ -205,7 +208,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
         {/* Filters / Params */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
           <div className="input-group">
-            <label htmlFor="outreach-niche" className="input-label">Industry</label>
+            <label htmlFor="outreach-niche" className="input-label">Niche</label>
             <input id="outreach-niche" type="text" className="input-field" value={creator.niche} disabled style={{ opacity: 0.7 }} />
           </div>
           <div className="input-group">
@@ -290,7 +293,7 @@ export default function OutreachModal({ creator, onClose, onStatusUpdate }: Outr
                     disabled={sendingEmail || !emailBody}
                     style={{ padding: '6px 14px', fontSize: '12px' }}
                   >
-                    {sendingEmail ? 'Sending...' : 'Send Email'}
+                    {sendingEmail ? 'Sending...' : 'Send via SMTP'}
                   </button>
                 ) : (
                   <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>No email address available</span>

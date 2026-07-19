@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 
 interface DiscoveryPanelProps {
-  onDiscoveryComplete: (enrichResult?: any) => void;
+  onDiscoveryComplete: () => void;
 }
 
 export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelProps) {
-  const [customNiche, setCustomNiche] = useState('');
+  const [niche, setNiche] = useState('Fashion');
   const [loading, setLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [progress, setProgress] = useState({ total: 0, current: 0 });
@@ -16,8 +16,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
   const handleDiscover = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalNiche = customNiche.trim();
-    if (!finalNiche) return;
+    if (!niche.trim()) return;
 
     setLoading(true);
     setNewlySaved([]);
@@ -26,7 +25,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
     setStatusText('Searching DuckDuckGo...');
 
     try {
-      const searchRes = await fetch(`/api/discovery/search?niche=${encodeURIComponent(finalNiche)}`);
+      const searchRes = await fetch(`/api/discovery/search?niche=${encodeURIComponent(niche)}`);
       if (!searchRes.ok) throw new Error(`Search API failed with status ${searchRes.status}`);
 
       const searchData = await searchRes.json();
@@ -49,7 +48,6 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
       let totalSkipped = 0;
       let totalErrors = 0;
       const savedHandles: string[] = [];
-      const allDetails: any[] = [];
 
       for (let i = 0; i < totalUrls; i += batchSize) {
         const batch = urls.slice(i, i + batchSize);
@@ -60,7 +58,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
         const enrichRes = await fetch('/api/discovery/enrich', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ urls: batch, niche: finalNiche }),
+          body: JSON.stringify({ urls: batch, niche }),
         });
 
         if (!enrichRes.ok) {
@@ -76,7 +74,6 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
         if (enrichData.details) {
           enrichData.details.forEach((det: any) => {
-            allDetails.push(det);
             if (det.status === 'saved' && det.handle) {
               savedHandles.push(`@${det.handle}`);
             }
@@ -88,7 +85,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
       }
 
       setSummary({ saved: totalSaved, skipped: totalSkipped, errors: totalErrors });
-      onDiscoveryComplete({ saved: totalSaved, skipped: totalSkipped, errors: totalErrors, details: allDetails });
+      onDiscoveryComplete();
     } catch (err: any) {
       setStatusText(`Error: ${err.message}`);
     } finally {
@@ -147,7 +144,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 1 }}>
         <div>
-          <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>Creator Discovery Engine</h3>
+          <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>Influencer Discovery Engine</h3>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
             Source and enrich public creator profiles across Qoruz, StarNgage, and Collabstr.
           </p>
@@ -156,21 +153,19 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
 
       {/* Idle: show search form */}
       {!loading && !summary && (
-        <form onSubmit={handleDiscover} style={{ display: 'flex', flexDirection: 'column', gap: '12px', zIndex: 1, width: '100%' }}>
-          <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
-            <input
-              type="text"
-              value={customNiche}
-              onChange={(e) => setCustomNiche(e.target.value)}
-              placeholder="Enter any niche (e.g. Fashion, Beauty, Gaming, Fitness...)"
-              className="input-field"
-              style={{ flex: 1 }}
-              required
-            />
-            <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', fontWeight: '500', flexShrink: 0 }}>
-              Discover
-            </button>
-          </div>
+        <form onSubmit={handleDiscover} style={{ display: 'flex', gap: '12px', zIndex: 1 }}>
+          <input
+            type="text"
+            value={niche}
+            onChange={(e) => setNiche(e.target.value)}
+            placeholder="Niche (e.g. Fashion, Tech, Beauty, Gaming)"
+            className="input-field"
+            style={{ flex: 1 }}
+            required
+          />
+          <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', fontWeight: '500' }}>
+            Scrape
+          </button>
         </form>
       )}
 
@@ -185,7 +180,7 @@ export default function DiscoveryPanel({ onDiscoveryComplete }: DiscoveryPanelPr
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '8px', height: '8px', backgroundColor: 'var(--color-accent-primary)', borderRadius: '50%', boxShadow: '0 0 12px var(--color-accent-primary)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-            <div role="status" aria-live="polite" aria-atomic="true" style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)', animation: 'status-pulse 1.5s infinite ease-in-out' }}>
+            <div style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)', animation: 'status-pulse 1.5s infinite ease-in-out' }}>
               {statusText}
             </div>
             {progress.total > 0 && (

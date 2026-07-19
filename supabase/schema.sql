@@ -74,36 +74,17 @@ ALTER TABLE public.influencers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.outreach_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
--- 2. Create role-scoped policies
--- Anon users (browser client) can only READ data
+-- 2. Create public policies so the dashboard can read/write data using the API key
 DROP POLICY IF EXISTS "Enable all access for anon users on influencers" ON public.influencers;
-DROP POLICY IF EXISTS "Anon read-only on influencers" ON public.influencers;
-CREATE POLICY "Anon read-only on influencers"
-ON public.influencers FOR SELECT
-TO anon
-USING (true);
-
--- Service role (server-side API routes) can do everything
-DROP POLICY IF EXISTS "Service role full access on influencers" ON public.influencers;
-CREATE POLICY "Service role full access on influencers"
-ON public.influencers FOR ALL
-TO service_role
-USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all access for anon users on influencers"
+ON public.influencers FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Enable all access for anon users on outreach_logs" ON public.outreach_logs;
-DROP POLICY IF EXISTS "Anon read-only on outreach_logs" ON public.outreach_logs;
-CREATE POLICY "Anon read-only on outreach_logs"
-ON public.outreach_logs FOR SELECT
-TO anon
-USING (true);
-
-DROP POLICY IF EXISTS "Service role full access on outreach_logs" ON public.outreach_logs;
-CREATE POLICY "Service role full access on outreach_logs"
-ON public.outreach_logs FOR ALL
-TO service_role
-USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all access for anon users on outreach_logs"
+ON public.outreach_logs FOR ALL USING (true) WITH CHECK (true);
 
 -- For security, the settings table contains sensitive API keys and SMTP credentials.
 -- RLS is enabled, and NO public read/write access policies are created for this table.
--- App credentials should be configured using server-side environment variables (.env.local).
+-- App credentials should be configured using server-side environment variables (.env.local) or local browser storage.
 DROP POLICY IF EXISTS "Enable all access for anon users on settings" ON public.settings;
+

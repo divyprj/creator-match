@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin, getAuthUserId } from '@/lib/supabaseServer';
+import { supabase } from '@/lib/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,15 +12,9 @@ function escapeCsvField(value: string): string {
 
 export async function GET() {
   try {
-    const userId = await getAuthUserId();
-    if (!userId) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('influencers')
       .select('*')
-      .eq('user_id', userId)
       .order('followers_count', { ascending: false });
 
     if (error) {
@@ -33,7 +27,7 @@ export async function GET() {
       'Content Themes', 'Profile Link', 'Outreach Status',
     ];
 
-    const rows = (data || []).map((c: any) => {
+    const rows = (data || []).map((c) => {
       const contentThemes = (c.recent_posts || [])
         .map((p: any) => (p.text || '').substring(0, 80))
         .filter(Boolean)
@@ -55,7 +49,7 @@ export async function GET() {
       ].map(escapeCsvField);
     });
 
-    const csvContent = [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
 
     return new NextResponse(csvContent, {
       headers: {

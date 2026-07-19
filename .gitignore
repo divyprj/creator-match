@@ -41,8 +41,3 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
-
-# temporary & local agent files
-.claude/
-scratch/
-PROJECT_AUDIT.md

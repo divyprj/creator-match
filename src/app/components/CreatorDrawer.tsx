@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 import { Creator, OutreachLog } from '@/types';
@@ -15,32 +15,12 @@ interface CreatorDrawerProps {
 export default function CreatorDrawer({ creator, onClose, onOpenOutreach }: CreatorDrawerProps) {
   const [logs, setLogs] = useState<OutreachLog[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (creator) {
       fetchOutreachLogs(creator.id);
     }
   }, [creator]);
-
-  useEffect(() => {
-    if (!creator) return;
-    const el = drawerRef.current;
-    if (!el) return;
-    const focusable = el.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    first?.focus();
-
-    const trap = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
-      if (e.key !== 'Tab') return;
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-    };
-    el.addEventListener('keydown', trap);
-    return () => el.removeEventListener('keydown', trap);
-  }, [creator, onClose]);
 
   const fetchOutreachLogs = async (creatorId: string) => {
     setLoadingLogs(true);
@@ -64,7 +44,7 @@ export default function CreatorDrawer({ creator, onClose, onOpenOutreach }: Crea
 
   return (
     <div className="drawer-backdrop" onClick={onClose}>
-      <div className="drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Creator Profile" onClick={(e) => e.stopPropagation()}>
+      <div className="drawer" onClick={(e) => e.stopPropagation()}>
         {/* Drawer Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)', paddingBottom: '15px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '600' }}>Creator Profile</h2>
@@ -90,7 +70,7 @@ export default function CreatorDrawer({ creator, onClose, onOpenOutreach }: Crea
             />
           ) : (
             <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold' }}>
-              {(creator.name || '?')[0]}
+              {creator.name[0]}
             </div>
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -115,13 +95,13 @@ export default function CreatorDrawer({ creator, onClose, onOpenOutreach }: Crea
         {/* Key Metrics Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div className="glass" style={{ padding: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Followers</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Followers</div>
             <div style={{ fontSize: '18px', fontWeight: 'bold', marginTop: '4px', color: 'var(--secondary)' }}>
               {creator.followers_count.toLocaleString()}
             </div>
           </div>
           <div className="glass" style={{ padding: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Engagement</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Engagement</div>
             <div style={{ fontSize: '18px', fontWeight: 'bold', marginTop: '4px', color: 'var(--primary)' }}>
               {creator.engagement_rate_str || (creator.engagement_rate ? `${creator.engagement_rate}%` : 'N/A')}
             </div>
@@ -141,19 +121,19 @@ export default function CreatorDrawer({ creator, onClose, onOpenOutreach }: Crea
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {creator.email && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Email address</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '600' }}>Email</span>
               <span style={{ fontSize: '14px', color: '#10b981', fontWeight: '500' }}>{creator.email}</span>
             </div>
           )}
           {creator.location && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Location</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '600' }}>Location</span>
               <span style={{ fontSize: '14px' }}>{creator.location}</span>
             </div>
           )}
           {creator.bio && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Bio</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '600' }}>Bio</span>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.4', whiteSpace: 'pre-line' }}>{creator.bio}</p>
             </div>
           )}
