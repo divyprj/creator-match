@@ -109,14 +109,14 @@ export function AuthForm({ configured, initialError }: { configured: boolean; in
         <button
           type="button"
           onClick={() => { setMethod("code"); setMessage(null); }}
-          className={`rounded-full px-4 py-2.5 ${method === "code" ? "bg-white text-black" : "text-white/45"}`}
+          className={`min-h-11 rounded-full px-4 py-2.5 sm:min-h-0 ${method ==="code" ? "bg-white text-black" : "text-white/45"}`}
         >
           Email code
         </button>
         <button
           type="button"
           onClick={() => { setMethod("password"); setMessage(null); }}
-          className={`rounded-full px-4 py-2.5 ${method === "password" ? "bg-white text-black" : "text-white/45"}`}
+          className={`min-h-11 rounded-full px-4 py-2.5 sm:min-h-0 ${method ==="password" ? "bg-white text-black" : "text-white/45"}`}
         >
           Password
         </button>

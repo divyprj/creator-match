@@ -237,7 +237,7 @@ export function CreatorSearch({ isAuthenticated }: { isAuthenticated: boolean })
                     aria-label="Sort creators by"
                     value={sort}
                     onChange={(event) => setSort(event.target.value as SortKey)}
-                    className="rounded-lg border border-white/10 bg-[#11151c] px-3 py-2 text-sm text-white/80"
+                    className="min-h-11 rounded-lg border border-white/10 bg-[#11151c] px-3 py-2 text-base text-white/80 sm:min-h-0 sm:text-sm"
                   >
                     {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
                       <option key={key} value={key}>{SORT_LABELS[key]}</option>

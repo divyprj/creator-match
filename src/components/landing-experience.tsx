@@ -69,7 +69,7 @@ export function LandingExperience({ isAuthenticated }: { isAuthenticated: boolea
     <main ref={root} className="w-full max-w-full overflow-x-hidden bg-[#080a0e] text-white">
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 md:px-8">
         <nav className="mx-auto flex max-w-[1400px] items-center justify-between rounded-full border border-white/10 bg-[#0c0f14]/80 px-4 py-3 shadow-2xl shadow-black/20 backdrop-blur-xl md:px-5">
-          <Link href="/" className="flex items-center gap-3 text-sm font-semibold tracking-[-0.02em] text-white">
+          <Link href="/" className="flex min-h-11 items-center gap-3 text-sm font-semibold tracking-[-0.02em] text-white">
             <span className="brand-mark"><span /></span> Creator Match
           </Link>
           <div className="hidden items-center gap-7 text-sm text-white/50 md:flex">
