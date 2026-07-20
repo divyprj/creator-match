@@ -10,6 +10,21 @@ describe("youtubeEngagementRate", () => {
     ])).toEqual({ rate: 10, sampleSize: 2 });
   });
   it("returns a transparent empty result", () => expect(youtubeEngagementRate([])).toEqual({ rate: null, sampleSize: 0 }));
+
+  it("excludes low-view videos that would inflate the rate", () => {
+    // 40 views / 12 interactions is 30%, which would dominate a mean built from real samples.
+    expect(youtubeEngagementRate([
+      { viewCount: "1000", likeCount: "40", commentCount: "10" },
+      { viewCount: "40", likeCount: "10", commentCount: "2" },
+    ])).toEqual({ rate: 5, sampleSize: 1 });
+  });
+
+  it("reports no rate when every sampled video is below the view floor", () => {
+    expect(youtubeEngagementRate([
+      { viewCount: "30", likeCount: "9", commentCount: "1" },
+      { viewCount: "12", likeCount: "4", commentCount: "0" },
+    ])).toEqual({ rate: null, sampleSize: 0 });
+  });
 });
 
 describe("parseCompactNumber", () => {

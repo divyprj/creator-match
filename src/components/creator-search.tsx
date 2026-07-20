@@ -43,13 +43,17 @@ export function CreatorSearch({ isAuthenticated }: { isAuthenticated: boolean })
 
   const strictCount = useMemo(() => results.filter((result) => result.strictEligible).length, [results]);
 
-  // Unverified metrics sort last rather than counting as zero, so a creator whose engagement could
-  // not be measured is never presented as worse than one measured at a genuinely low rate.
+  // Two rules, in order. Strict matches always lead, because sorting purely by a metric pushed
+  // creators with no contact email to the top and buried every creator you could actually reach.
+  // Within each group, unverified metrics sort last rather than counting as zero, so a creator
+  // whose engagement could not be measured is never ranked below one measured at a genuinely low
+  // rate.
   const sorted = useMemo(() => {
     const copy = [...results];
     if (sort === "relevance") return copy;
     const field = sort === "engagement" ? "engagementRate" : "followers";
     return copy.sort((first, second) => {
+      if (first.strictEligible !== second.strictEligible) return first.strictEligible ? -1 : 1;
       const a = first[field];
       const b = second[field];
       if (a == null && b == null) return 0;
