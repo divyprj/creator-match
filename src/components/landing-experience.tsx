@@ -48,6 +48,21 @@ export function LandingExperience({ isAuthenticated }: { isAuthenticated: boolea
         pinSpacing: false,
       });
     }
+
+    // ScrollTrigger measures start and end positions once, at creation. Live search injects up to
+    // fifty result cards below this section, which moves everything after it by thousands of pixels
+    // and leaves those measurements stale. The pinned workflow title then stayed fixed well past its
+    // intended range and rendered on top of the results. Re-measuring whenever the document height
+    // changes keeps the pin bound to the section it belongs to.
+    let lastHeight = document.documentElement.scrollHeight;
+    const observer = new ResizeObserver(() => {
+      const height = document.documentElement.scrollHeight;
+      if (Math.abs(height - lastHeight) < 4) return;
+      lastHeight = height;
+      ScrollTrigger.refresh();
+    });
+    observer.observe(document.body);
+    return () => observer.disconnect();
   }, { scope: root });
 
   return (
