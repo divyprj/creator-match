@@ -44,7 +44,10 @@ export function AuthForm({ configured, initialError }: { configured: boolean; in
       });
       if (error) throw error;
       setCodeSent(true);
-      setMessage("Check your inbox. Use the six-digit code below, or click the link in the email.");
+      // Supabase only allows template edits on custom SMTP, and its default Magic Link template
+      // omits {{ .Token }}. On the built-in email service the link is therefore the working path,
+      // so the copy leads with it and treats the code as the fallback rather than the default.
+      setMessage("Check your inbox and click the sign-in link. If your email also contains a six-digit code, you can enter it below instead.");
     } catch (error) {
       fail(error, "Could not send the sign-in email.");
     } finally {
@@ -171,7 +174,8 @@ export function AuthForm({ configured, initialError }: { configured: boolean; in
               {busy ? "Sending" : "Send sign-in code"}
             </button>
             <p className="mt-4 text-xs leading-5 text-white/30">
-              We email a six-digit code and a one-click link. Either one signs you in.
+              We email a one-click sign-in link. No password needed — this creates your account if
+              you do not have one yet.
             </p>
           </form>
         )

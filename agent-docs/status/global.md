@@ -39,7 +39,7 @@ details on pages that rank.
 
 ## Outstanding before submission
 
-- Provision the new Supabase project: apply `supabase/migrations/202607200001_initial.sql`, set the site URL, allowlist `/auth/callback`, and add `{{ .Token }}` to the Magic Link email template.
+- Provision the new Supabase project: apply `supabase/migrations/202607200001_initial.sql`, set the site URL, and allowlist `/auth/callback`. Magic-link sign-in works on the built-in email service; the six-digit code needs custom SMTP, which also lifts the low hourly send cap.
 - Provision the new Vercel project and add all environment variables to Production and Preview.
 - Run `git init` inside the project directory. The enclosing repo root is currently the user's home directory.
 - Export the CSV deliverable by running Fashion, Beauty, Food and Fitness searches while signed in.

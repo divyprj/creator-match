@@ -88,7 +88,7 @@ the same logic — generate, review, copy, open profile.
 1. Copy `.env.example` to `.env.local` and fill the keys.
 2. Create a new Supabase project and run `supabase/migrations/202607200001_initial.sql` in its SQL editor.
 3. In Supabase Auth URL Configuration, set the local site URL to `http://localhost:3000` and add `http://localhost:3000/auth/callback` to the redirect allowlist. Add the deployed Vercel URL and its `/auth/callback` path after deployment.
-4. In Supabase Auth email templates, add `{{ .Token }}` to the Magic Link template. Supabase ships that template with only `{{ .ConfirmationURL }}`, so without this edit the magic link works but the six-digit code never reaches the inbox.
+4. Optional, requires custom SMTP: add `{{ .Token }}` to the Magic Link email template. Supabase ships that template with only `{{ .ConfirmationURL }}` and **locks template editing unless custom SMTP is configured**, so on the built-in email service the magic link is the working path and the six-digit code is never sent. The app handles this: the link signs the user in through `/auth/callback`, and the code field is an optional fallback. Configuring Gmail SMTP here also raises the built-in service's low hourly email cap.
 5. Enable the YouTube Data API v3 in your Google Cloud project and create a server API key restricted to that API.
 6. Create a Tavily API key and a Google App Password for the Gmail sender you control. Store the App Password only as `GMAIL_APP_PASSWORD`.
 7. Run `pnpm dev`.
