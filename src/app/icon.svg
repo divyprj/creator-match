@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Creator Match">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171b24"/>
+      <stop offset="1" stop-color="#0b0e13"/>
+    </linearGradient>
+    <linearGradient id="arc" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#6c5ce7"/>
+      <stop offset="1" stop-color="#9d8cff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#b9adff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#725cff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="url(#tile)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.09"/>
+
+  <!-- Open ring: the field being searched. The gap keeps it reading as a sweep rather than a closed
+       circle, and gives the node somewhere to sit. -->
+  <path d="M 41.75 18.07 A 17 17 0 1 0 41.75 45.93"
+        fill="none" stroke="url(#arc)" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- The match: one creator resolved out of the field, carrying the glow from the existing brand mark. -->
+  <circle cx="41.75" cy="18.07" r="11" fill="url(#glow)"/>
+  <circle cx="41.75" cy="18.07" r="5.5" fill="#c3b8ff"/>
+</svg>

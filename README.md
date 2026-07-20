@@ -340,7 +340,64 @@ deliverables/                     Assignment artifacts
 agent-docs/                       Architecture decisions and status records
 ```
 
+## Running it on Windows
+
+The `launchers/` folder holds six double-click actions. Each `.exe` is a thin shim that runs the
+matching `.bat`, which exists only so Windows can show a distinct icon per action. Everything real
+lives in `scripts/launcher.ps1`.
+
+| Launcher | What it does |
+|---|---|
+| `install` | Installs dependencies, then walks you through entering your own API keys |
+| `run` | Starts the dev server, waits until it actually accepts connections, then opens your browser |
+| `stop` | Terminates the dev server and its child processes. Your browser tab is left alone |
+| `update` | Fetches and fast-forwards to the latest commit, stashing local changes first |
+| `repair` | Resets to the newest release tag, clears `.next` and `node_modules`, reinstalls |
+| `uninstall` | Permanently deletes the project directory after you type the folder name |
+
+Some deliberate choices in there:
+
+`stop` kills only the dev server. Closing one specific browser tab is not something a script can do
+reliably, and killing the whole browser to get at one tab would take unrelated windows and unsaved
+work with it.
+
+`repair` targets the latest release tag rather than the newest commit, because releases are
+deliberate checkpoints while `main` can carry work that has not been verified yet. It stashes local
+changes rather than discarding them, and never touches `.env.local`.
+
+`uninstall` deletes outright, with no Recycle Bin copy, so it asks you to type the folder name first.
+A misclick in Explorer should not be able to destroy the directory.
+
+`update` and `repair` need a real git checkout. If you downloaded a zip instead of cloning, they will
+tell you so rather than failing halfway.
+
+Rebuilding the launcher binaries after changing the icons or the shim:
+
+```bash
+python scripts/generate-icons.py
+powershell -ExecutionPolicy Bypass -File scripts/compile-launchers.ps1
+```
+
+## Credentials
+
+This repository ships no API keys. On a fresh clone, `install` detects that `.env.local` is missing
+or incomplete and runs `scripts/setup-env.mjs`, which prompts for each credential, says where to get
+it, validates the obvious mistakes, and writes `.env.local`. That file is gitignored, so nothing you
+enter can be committed by accident. Existing values are shown masked and kept if you press Enter.
+
+You can also run it directly:
+
+```bash
+node scripts/setup-env.mjs
+```
+
+Two steps it cannot do for you, because they happen in the Supabase dashboard: applying
+`supabase/migrations/202607200001_initial.sql`, and allowlisting `/auth/callback` under
+Authentication, URL Configuration.
+
 ## Local setup
+
+If you prefer doing it by hand rather than through the launchers:
 
 1. Copy `.env.example` to `.env.local` and fill in the values.
 2. Create a Supabase project and run `supabase/migrations/202607200001_initial.sql` in the SQL editor.
