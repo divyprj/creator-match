@@ -74,10 +74,12 @@ export async function POST(request: Request) {
       : Promise.resolve([] as CreatorResult[]);
 
     // YouTube's own search is the only discovery path that returns verified subscriber counts, so
-    // it is what actually fills the micro band. Each query costs 100 quota units, hence the
-    // authenticated-only gate and the limit-scaled variant count.
+    // it is what actually fills the micro band. It runs for anonymous visitors too: gating it
+    // behind sign-in left the public preview returning near-zero usable results, which reads as a
+    // broken product. Cost stays bounded because the variant count scales with the result limit,
+    // so an 8-result preview spends two queries rather than ten.
     const youtubeNative =
-      user && input.data.platforms.includes("YouTube")
+      input.data.platforms.includes("YouTube")
         ? discoverYouTubeChannels({
             apiKey: serverConfig.youtubeApiKey!,
             niche: input.data.niche,
