@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   if (!input.success) return NextResponse.json({ error: input.error.issues[0]?.message }, { status: 400 });
   const words = countWords(input.data.body);
   if (words < 60 || words > 90) {
-    return NextResponse.json({ error: `Email must contain 60–90 words; received ${words}.` }, { status: 400 });
+    return NextResponse.json({ error: `Email must contain 60 to 90 words; received ${words}.` }, { status: 400 });
   }
   if (!serverConfig.gmailUser || !serverConfig.gmailAppPassword) {
     return NextResponse.json({ error: "Gmail SMTP is ready but its App Password is not configured." }, { status: 503 });

@@ -21,8 +21,8 @@ function parseGenerated(content: string) {
   const parsed = generatedSchema.parse(JSON.parse(content));
   const emailWords = countWords(parsed.email);
   const dmWords = countWords(parsed.dm);
-  if (emailWords < 60 || emailWords > 90) throw new Error(`Email has ${emailWords} words; expected 60–90.`);
-  if (dmWords < 15 || dmWords > 30) throw new Error(`DM has ${dmWords} words; expected 15–30.`);
+  if (emailWords < 60 || emailWords > 90) throw new Error(`Email has ${emailWords} words; expected 60 to 90.`);
+  if (dmWords < 15 || dmWords > 30) throw new Error(`DM has ${dmWords} words; expected 15 to 30.`);
   return { ...parsed, emailWords, dmWords, model: serverConfig.geminiModel ?? "gemini-flash-latest" };
 }
 

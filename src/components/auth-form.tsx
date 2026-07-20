@@ -126,7 +126,7 @@ export function AuthForm({ configured, initialError }: { configured: boolean; in
         codeSent ? (
           <form onSubmit={verifyCode}>
             <p className="mb-5 text-sm leading-6 text-white/45">
-              Sent to <span className="text-white/75">{email}</span>. No password is needed — signing in this way
+              Sent to <span className="text-white/75">{email}</span>. No password is needed. Signing in this way
               creates your account if you do not have one yet.
             </p>
             <label className="form-label">
@@ -174,7 +174,7 @@ export function AuthForm({ configured, initialError }: { configured: boolean; in
               {busy ? "Sending" : "Send sign-in code"}
             </button>
             <p className="mt-4 text-xs leading-5 text-white/30">
-              We email a one-click sign-in link. No password needed — this creates your account if
+              We email a one-click sign-in link. No password needed. This creates your account if
               you do not have one yet.
             </p>
           </form>

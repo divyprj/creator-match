@@ -6,7 +6,7 @@ const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 const spaceMono = Space_Mono({ variable: "--font-space-mono", subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-  title: "Creator Match — Live Indian creator intelligence",
+  title: "Creator Match: Live Indian creator intelligence",
   description: "Discover evidence-backed Indian micro-influencers on Instagram and YouTube, then prepare considered outreach.",
 };
 

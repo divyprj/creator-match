@@ -127,7 +127,7 @@ export function LandingExperience({ isAuthenticated }: { isAuthenticated: boolea
           <div className="mt-20 grid grid-flow-dense grid-cols-1 gap-px overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 md:grid-cols-12 md:grid-rows-2">
             <Bento className="md:col-span-8" icon={<MagnifyingGlass />} title="Candidate discovery" body="Tavily searches a live query matrix across niches, Indian location signals and supported platforms. It provides URLs and excerpts, never invented profile records." accent="violet" />
             <Bento className="md:col-span-4" icon={<Database />} title="Platform truth" body="Official YouTube metadata and authorized Instagram evidence replace estimates wherever access permits." accent="blue" />
-            <Bento className="md:col-span-4" icon={<ShieldCheck />} title="Strict gate" body="Missing email, location, follower or engagement evidence is shown as a reason—not silently filled." accent="green" />
+            <Bento className="md:col-span-4" icon={<ShieldCheck />} title="Strict gate" body="Missing email, location, follower or engagement evidence is shown as a reason, not silently filled." accent="green" />
             <Bento className="md:col-span-8" icon={<Sparkle />} title="Personalized, not generated at random" body="Gemini receives the creator's public profile signals and writes copy that names them and references their actual work. Contact emails stay out of the prompt, and every draft is reviewed before it sends." accent="amber" />
           </div>
 
