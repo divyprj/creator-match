@@ -363,8 +363,12 @@ agent-docs/                       Architecture decisions and status records
 | `YOUTUBE_API_KEY` | Server | Channel discovery and metric verification |
 | `GEMINI_API_KEY` | Server | Outreach copy generation |
 | `GEMINI_MODEL` | Server | Optional, defaults to `gemini-flash-latest` |
-| `GMAIL_USER` | Server | Sending address |
-| `GMAIL_APP_PASSWORD` | Server | Google App Password |
+| `GMAIL_USER` | Server | Sending address. Use a dedicated account, not a personal inbox |
+| `GMAIL_APP_PASSWORD` | Server | Google App Password, never the account password |
+
+Use a separate Google account for sending rather than a personal one. An App Password grants full
+SMTP access to whatever account issued it, so scoping it to a dedicated sender limits what a leaked
+credential can reach and keeps outreach replies out of a personal inbox.
 
 ## Quality gates
 
