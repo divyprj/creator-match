@@ -38,11 +38,26 @@ YouTube-native discovery produces essentially all deliverable rows. The Tavily s
 
 ## Outstanding before submission
 
-- Delete the QA artifact rows in `saved_creators`. Five creators were saved during testing, three of them before the engagement fix, so the dashboard still reports a stale 20.75% mean.
-- Rotate the Tavily, YouTube and Gemini API keys, and revoke the Gmail App Password, before sharing the repository or transcript.
-- Decide whether to delete the `prototype-archive` branch, which still contains the earlier fabricated-email CSV.
-- Optional: configure custom SMTP in Supabase to unlock the six-digit sign-in code and lift the built-in email service's low hourly cap.
-- Optional: measure the dashboard at mobile width, the one surface not covered by the responsive pass.
+Only one item remains, and it must be done by the account owner.
+
+**Rotate the credentials.** The Tavily, YouTube and Gemini API keys and the Gmail App Password were all shared in a working transcript and should be treated as compromised. Sequence matters, because rotating in the wrong order takes the deployment down:
+
+1. Generate replacements first — Google AI Studio, Google Cloud Console, Tavily dashboard, and Google Account → App Passwords.
+2. Update them in Vercel (Production and Development) and in local `.env.local`.
+3. Only then revoke the old credentials.
+
+Doing step 3 first leaves production returning 503s until step 1 completes.
+
+### Optional
+
+- Configure custom SMTP in Supabase to unlock the six-digit sign-in code and lift the built-in email service's low hourly cap. The Gmail credentials already in use would serve.
+- Measure the dashboard at mobile width, the one surface not covered by the responsive pass.
+- Clear `discovery_runs` (4 rows) and `outreach_events` (1 row) if a pristine demo dashboard is wanted. They are accurate records of real QA activity, so they were left in place.
+
+### Completed
+
+- QA artifact rows removed from `saved_creators`; the dashboard's stale 20.75% mean now correctly reads "Unverified".
+- `prototype-archive` branch deleted, removing the earlier fabricated-email CSV from the repository. Its tip was `6bc910f`, recoverable from GitHub's unreferenced-commit window if ever needed.
 
 ## See also
 
