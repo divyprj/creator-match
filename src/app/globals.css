@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root { --background: #080a0e; --foreground: #f7f8fb; color-scheme: dark; }
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-space-mono);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--background); }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-outfit), sans-serif; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: #725cff; color: white; }
+
+.brand-mark { display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid rgb(255 255 255 / .18); border-radius: 50%; }
+.brand-mark span { width: 9px; height: 9px; border-radius: 50%; background: #9d8cff; box-shadow: 0 0 16px #725cff; }
+.eyebrow { font: 700 11px/1 var(--font-space-mono), monospace; letter-spacing: .17em; text-transform: uppercase; color: rgb(255 255 255 / .38); }
+
+.primary-button, .secondary-button, .nav-button, .quiet-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .55rem; border-radius: 999px;
+  white-space: nowrap; font-weight: 600; transition: transform .25s ease, background-color .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease;
+}
+.primary-button { min-height: 50px; padding: 0 1.2rem; background: #f5f2eb; color: #111318; font-size: 14px; }
+.primary-button:hover { transform: translateY(-2px); background: white; }
+.secondary-button { min-height: 50px; padding: 0 1.2rem; border: 1px solid rgb(255 255 255 / .14); background: rgb(255 255 255 / .055); color: rgb(255 255 255 / .75); font-size: 14px; }
+.secondary-button:hover, .quiet-button:hover { border-color: rgb(255 255 255 / .32); color: white; }
+.nav-button { min-height: 40px; padding: 0 1rem; background: #f2efe8; color: #111318; font-size: 13px; }
+.quiet-button { min-height: 38px; padding: 0 .85rem; border: 1px solid rgb(255 255 255 / .1); background: rgb(255 255 255 / .035); color: rgb(255 255 255 / .62); font-size: 12px; }
+button:disabled { cursor: not-allowed; opacity: .48; transform: none !important; }
+
+.hero-ambient { position: absolute; inset: 7% 9% auto; height: 58%; background: radial-gradient(ellipse at center, rgb(114 92 255 / .23), transparent 64%); filter: blur(42px); pointer-events: none; }
+.hero-image { position: absolute; inset: 0; background-image: linear-gradient(120deg, rgb(8 10 14 / .2), transparent), url("https://picsum.photos/seed/indian-creator-studio/1800/1000"); background-size: cover; background-position: center; filter: grayscale(1) contrast(1.15) brightness(.68); transform: scale(1.03); }
+
+.marquee-shell { overflow: hidden; border-block: 1px solid rgb(255 255 255 / .08); background: #0c0f14; }
+.marquee-track { display: flex; width: max-content; animation: marquee 35s linear infinite; }
+.marquee-track span { display: flex; align-items: center; gap: 2rem; padding: 1.25rem 1rem; font-size: 12px; text-transform: uppercase; letter-spacing: .15em; color: rgb(255 255 255 / .42); }
+.marquee-track i { width: 5px; height: 5px; margin-right: 1rem; border-radius: 999px; background: #8b75ff; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+.bento-orb { position: absolute; width: 220px; height: 220px; right: -70px; top: -80px; border-radius: 50%; filter: blur(8px); opacity: .35; transition: transform .7s cubic-bezier(.2,.75,.2,1); }
+article:hover > .bento-orb { transform: scale(1.25) translate(-8px, 8px); }
+.bento-violet { background: radial-gradient(circle, #725cff, transparent 68%); }
+.bento-blue { background: radial-gradient(circle, #176dff, transparent 68%); }
+.bento-green { background: radial-gradient(circle, #7ed99f, transparent 68%); }
+.bento-amber { background: radial-gradient(circle, #ffb65c, transparent 68%); }
+
+.field-shell { display: block; min-width: 0; border-radius: 1.1rem; border: 1px solid rgb(255 255 255 / .085); background: #151922; padding: .9rem 1rem; }
+.field-shell > span { display: block; font: 700 10px/1 var(--font-space-mono), monospace; letter-spacing: .15em; text-transform: uppercase; color: rgb(255 255 255 / .34); }
+.field-shell select, .field-shell input, .field-shell textarea { width: 100%; outline: none; }
+.field-shell select { margin-top: .65rem; border: 0; background: transparent; color: white; font-weight: 600; }
+.field-shell option { background: #151922; }
+.platform-toggle { display: inline-flex; align-items: center; gap: .35rem; border: 1px solid rgb(255 255 255 / .1); border-radius: 999px; padding: .55rem .7rem; color: rgb(255 255 255 / .45); font-size: 12px; }
+.platform-toggle-active { border-color: rgb(157 140 255 / .65); background: rgb(114 92 255 / .18); color: white; }
+.range-pair { position: relative; height: 26px; margin-top: 6px; }
+.range-pair::before { content: ""; position: absolute; inset: 12px 0 auto; height: 2px; background: rgb(255 255 255 / .12); }
+.range-pair input { position: absolute; inset: 0; height: 26px; appearance: none; background: transparent; pointer-events: none; }
+.range-pair input::-webkit-slider-thumb { width: 17px; height: 17px; appearance: none; border: 3px solid #151922; border-radius: 50%; background: #9d8cff; box-shadow: 0 0 0 1px rgb(255 255 255 / .25); pointer-events: auto; cursor: grab; }
+.status-chip { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid; border-radius: 999px; padding: .35rem .5rem; white-space: nowrap; font-size: 10px; font-weight: 600; }
+.status-good { border-color: rgb(126 217 159 / .3); background: rgb(126 217 159 / .09); color: #9be2b4; }
+.status-pending { border-color: rgb(255 182 92 / .25); background: rgb(255 182 92 / .08); color: #ffca89; }
+
+.form-input { width: 100%; border: 1px solid rgb(255 255 255 / .1); border-radius: .9rem; background: #151922; padding: .85rem 1rem; color: white; outline: none; transition: border-color .2s ease; }
+.form-input:focus { border-color: rgb(157 140 255 / .7); }
+.form-label { display: grid; gap: .55rem; color: rgb(255 255 255 / .48); font-size: 12px; }
+.panel { border: 1px solid rgb(255 255 255 / .1); border-radius: 1.5rem; background: #10131a; }
+
+@media (max-width: 640px) {
+  .nav-button { padding-inline: .8rem; }
+  .hero-image { background-position: 58% center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
