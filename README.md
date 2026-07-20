@@ -22,7 +22,7 @@ There is deliberately no seed dataset, mock creator, or synthetic fallback. A mi
 | Assignment deliverable | Where it lives |
 |---|---|
 | Source code | This repository |
-| CSV of 50 Indian influencers | Exported from the app — see below |
+| CSV of 50 Indian influencers | [`deliverables/indian-micro-influencers.csv`](deliverables/indian-micro-influencers.csv) — 86 rows, or export fresh from the app |
 | Personalized email templates | [`deliverables/email-templates.md`](deliverables/email-templates.md) |
 | Personalized Instagram DM templates | [`deliverables/instagram-dm-templates.md`](deliverables/instagram-dm-templates.md) |
 | README explaining workflow | This file |
@@ -46,20 +46,26 @@ the app reports the shortfall rather than inventing rows.
 
 ### Measured yield
 
-Live measurement on 2026-07-20, ten YouTube discovery queries per niche:
+Live measurement on 2026-07-20, eight YouTube discovery queries per niche. Every qualified row has
+a verified subscriber count inside 5,000–100,000, a creator-published contact email, and an
+engagement rate measured from real recent-video statistics.
 
-| Niche | Channels found | In 5K–100K band | With contact email | Deliverable |
-|---|---|---|---|---|
-| Fashion | 476 | 60 | 22 | 19 |
-| Beauty | 450 | 69 | 21 | 19 |
-| Food | 381 | 30 | 9 | 8 |
-| Fitness | 440 | 40 | 12 | 11 |
+| Niche | Channels discovered | Qualified |
+|---|---|---|
+| Fashion | 389 | 15 |
+| Beauty | 387 | 16 |
+| Food | 314 | 6 |
+| Fitness | 364 | 12 |
+| Tech | 374 | 25 |
+| Education | 379 | 15 |
+| **Total (deduplicated)** | | **86** |
 
-Four niches produce **57 qualified creators**, clearing the assignment's target of 50. Fashion and
-Beauty alone give a 38-creator *Indian Fashion & Beauty* segment.
+That clears the assignment's target of 50. Fashion and Beauty alone give a 31-creator *Indian
+Fashion & Beauty* segment. Engagement across the set has a median of 2.35% and a maximum of 9.54%,
+which is the credible range for YouTube.
 
-This is deliberately not 50 per niche. About 4% of discovered channels have both a micro-sized
-audience and a published contact email, so one niche yields 8–19. Reaching 50 within a single niche
+This is deliberately not 50 per niche. Roughly 4% of discovered channels have both a micro-sized
+audience and a published contact email, so one niche yields 6–25. Reaching 50 within a single niche
 is not achievable from public sources without inventing contact details, so the app spans niches
 instead.
 
